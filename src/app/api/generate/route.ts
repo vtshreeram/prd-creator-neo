@@ -21,7 +21,8 @@ function validateInputs(value: unknown): value is PrdInput {
     'successMetrics',
     'futureFeatures',
     'techStack',
-    'constraints'
+    'constraints',
+    'productMode'
   ];
 
   const stringFieldsValid = stringFields.every(

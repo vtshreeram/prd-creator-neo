@@ -1,8 +1,24 @@
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import React from 'react';
 
 interface MarkdownRendererProps {
   content: string;
+}
+
+function getIDFromChildren(children: React.ReactNode): string {
+  let text = '';
+  React.Children.forEach(children, (child) => {
+    if (typeof child === 'string') {
+      text += child;
+    } else if (React.isValidElement(child) && child.props.children) {
+      text += getIDFromChildren(child.props.children);
+    }
+  });
+  return text
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
 }
 
 export function MarkdownRenderer({ content }: MarkdownRendererProps) {
@@ -10,54 +26,58 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
     <ReactMarkdown
       remarkPlugins={[remarkGfm]}
       components={{
-        h1: ({ children }) => (
-          <h1
-            className="mt-8 mb-6 border-b-[3px] border-black pb-3 text-4xl font-black tracking-tight text-black uppercase"
-            style={{
-              fontFamily:
-                "'Big Shoulders Display', 'Impact', 'Arial Black', sans-serif"
-            }}
-          >
-            {children}
-          </h1>
-        ),
-        h2: ({ children }) => (
-          <h2
-            className="mt-6 mb-4 text-3xl font-extrabold tracking-tight text-black uppercase"
-            style={{
-              fontFamily:
-                "'Big Shoulders Display', 'Impact', 'Arial Black', sans-serif"
-            }}
-          >
-            {children}
-          </h2>
-        ),
-        h3: ({ children }) => (
-          <h3
-            className="mt-4 mb-3 text-2xl font-bold tracking-wide text-black uppercase"
-            style={{
-              fontFamily:
-                "'Big Shoulders Display', 'Impact', 'Arial Black', sans-serif"
-            }}
-          >
-            {children}
-          </h3>
-        ),
+        h1: ({ children }) => {
+          const id = getIDFromChildren(children);
+          return (
+            <h1
+              id={id}
+              className="mt-8 mb-6 scroll-mt-24 border-b border-gray-200 pb-3 text-3xl font-bold tracking-tight text-gray-900"
+            >
+              {children}
+            </h1>
+          );
+        },
+        h2: ({ children }) => {
+          const id = getIDFromChildren(children);
+          return (
+            <h2
+              id={id}
+              className="mt-8 mb-4 scroll-mt-24 text-2xl font-semibold tracking-tight text-gray-900"
+            >
+              {children}
+            </h2>
+          );
+        },
+        h3: ({ children }) => {
+          const id = getIDFromChildren(children);
+          return (
+            <h3
+              id={id}
+              className="mt-6 mb-3 scroll-mt-24 text-xl font-semibold tracking-tight text-gray-900"
+            >
+              {children}
+            </h3>
+          );
+        },
         p: ({ children }) => (
-          <p className="mb-4 leading-relaxed text-black">{children}</p>
+          <p className="mb-4 leading-relaxed text-gray-700">{children}</p>
         ),
         ul: ({ children }) => (
-          <ul className="mb-6 list-disc space-y-2 pl-8">{children}</ul>
+          <ul className="mb-6 list-disc space-y-2 pl-6 text-gray-700">
+            {children}
+          </ul>
         ),
         ol: ({ children }) => (
-          <ol className="mb-6 list-decimal space-y-2 pl-8">{children}</ol>
+          <ol className="mb-6 list-decimal space-y-2 pl-6 text-gray-700">
+            {children}
+          </ol>
         ),
         li: ({ children }) => (
-          <li className="mb-2 font-medium text-black">{children}</li>
+          <li className="mb-2 text-gray-700">{children}</li>
         ),
-        hr: () => <hr className="my-8 border-t-[3px] border-black" />,
+        hr: () => <hr className="my-8 border-gray-200" />,
         blockquote: ({ children }) => (
-          <blockquote className="my-4 border-l-4 border-black pl-4 italic">
+          <blockquote className="my-4 border-l-4 border-gray-200 bg-gray-50 py-2 pr-4 pl-4 text-gray-700 italic">
             {children}
           </blockquote>
         ),
@@ -66,15 +86,15 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
           const isInline = !match;
           return isInline ? (
             <code
-              className="border-[2px] border-black bg-[#F5F5F5] px-2 py-1 font-mono text-sm"
+              className="rounded-md bg-gray-100 px-1.5 py-0.5 font-mono text-sm text-gray-900"
               {...props}
             >
               {children}
             </code>
           ) : (
-            <div className="neo-overflow-x-auto neo-scrollbar mb-4">
+            <div className="mb-4 overflow-x-auto rounded-lg border border-gray-200">
               <code
-                className="block border-[2px] border-black bg-[#F5F5F5] p-4 font-mono text-sm"
+                className="block bg-gray-50 p-4 font-mono text-sm text-gray-800"
                 {...props}
               >
                 {children}
@@ -83,33 +103,39 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
           );
         },
         pre: ({ children }) => (
-          <div className="neo-overflow-x-auto neo-scrollbar mb-4">
-            <pre className="border-[2px] border-black bg-[#F5F5F5] p-4 font-mono">
+          <div className="mb-4 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50">
+            <pre className="p-4 font-mono text-sm text-gray-800">
               {children}
             </pre>
           </div>
         ),
         table: ({ children }) => (
-          <div className="neo-overflow-x-auto neo-scrollbar mb-4">
-            <table className="min-w-full border-collapse border-[2px] border-black bg-white">
+          <div className="mb-4 overflow-x-auto rounded-lg border border-gray-200">
+            <table className="min-w-full divide-y divide-gray-200 bg-white">
               {children}
             </table>
           </div>
         ),
+        thead: ({ children }) => (
+          <thead className="bg-gray-50">{children}</thead>
+        ),
+        tbody: ({ children }) => (
+          <tbody className="divide-y divide-gray-200 bg-white">
+            {children}
+          </tbody>
+        ),
         th: ({ children }) => (
-          <th className="border-[2px] border-black bg-[#FFEB3B] px-4 py-3 font-bold text-black">
+          <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">
             {children}
           </th>
         ),
         td: ({ children }) => (
-          <td className="border-[2px] border-black bg-white px-4 py-3">
-            {children}
-          </td>
+          <td className="px-4 py-3 text-sm text-gray-700">{children}</td>
         ),
         a: ({ href, children }) => (
           <a
             href={href}
-            className="text-blue-600 underline hover:text-blue-800"
+            className="font-medium text-blue-600 underline underline-offset-4 hover:text-blue-800"
             target="_blank"
             rel="noopener noreferrer"
           >
@@ -117,9 +143,11 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
           </a>
         ),
         strong: ({ children }) => (
-          <strong className="font-bold">{children}</strong>
+          <strong className="font-semibold text-gray-900">{children}</strong>
         ),
-        em: ({ children }) => <em className="italic">{children}</em>
+        em: ({ children }) => (
+          <em className="text-gray-800 italic">{children}</em>
+        )
       }}
     >
       {content}

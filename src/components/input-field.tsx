@@ -1,44 +1,36 @@
-import { InputHTMLAttributes } from 'react';
-import { clsx } from 'clsx';
+import * as React from 'react';
+import { cn } from '@/lib/utils';
 
-interface InputFieldProps extends InputHTMLAttributes<HTMLInputElement> {
+export interface InputFieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label: string;
-  id: string;
-  error?: string;
+  description?: string;
 }
 
-export function InputField({
-  label,
-  id,
-  error,
-  className = '',
-  required,
-  ...props
-}: InputFieldProps) {
-  return (
-    <div className="w-full">
-      <label
-        htmlFor={id}
-        className="mb-2 block text-sm font-semibold tracking-wide text-black uppercase"
-      >
-        {label}
-        {required && <span className="ml-1 text-[#E91E63]">*</span>}
-      </label>
-      <input
-        id={id}
-        className={clsx(
-          'block w-full border-[3px] border-black bg-white px-4 py-3 font-medium text-black placeholder-gray-500 shadow-[4px_4px_0px_#000] transition-all duration-150',
-          'focus:translate-x-[-1px] focus:translate-y-[-1px] focus:border-[#2196F3] focus:shadow-[4px_4px_0px_#2196F3] focus:outline-none',
-          'disabled:cursor-not-allowed disabled:opacity-50',
-          error && 'border-[#F44336] shadow-[4px_4px_0px_#F44336]',
-          className
-        )}
-        required={required}
-        {...props}
-      />
-      {error && (
-        <p className="mt-2 text-sm font-medium text-[#F44336]">{error}</p>
-      )}
-    </div>
-  );
-}
+const InputField = React.forwardRef<HTMLInputElement, InputFieldProps>(
+  ({ className, label, description, id, required, ...props }, ref) => {
+    return (
+      <div className="space-y-2">
+        <label
+          htmlFor={id}
+          className="text-sm font-bold tracking-wide uppercase"
+        >
+          {label} {required && <span className="text-[#F44336]">*</span>}
+        </label>
+        <input
+          id={id}
+          className={cn(
+            'flex h-11 w-full border-2 border-black bg-white px-4 py-2 text-sm font-medium placeholder:text-gray-500 focus-visible:ring-2 focus-visible:ring-[#2196F3] focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:bg-gray-100 disabled:opacity-50',
+            className
+          )}
+          ref={ref}
+          required={required}
+          {...props}
+        />
+        {description && <p className="text-sm text-gray-600">{description}</p>}
+      </div>
+    );
+  }
+);
+InputField.displayName = 'InputField';
+
+export { InputField };

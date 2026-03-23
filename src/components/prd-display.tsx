@@ -181,38 +181,32 @@ export function PRDDisplay({
 
   return (
     <div
-      className={`flex min-h-0 flex-col border-[3px] border-black bg-white shadow-[4px_4px_0px_#000] ${!isLivePreview ? 'generated-prd' : ''} group hover-overlay-trigger relative`}
+      className={`flex min-h-0 flex-col border-2 border-black bg-white shadow-[4px_4px_0px_#000] ${!isLivePreview ? 'generated-prd overflow-hidden' : ''} group relative`}
     >
-      <div className="flex flex-shrink-0 items-center justify-between border-b-[2px] border-black p-4">
-        <h2
-          className="text-xl font-black tracking-wide text-black uppercase"
-          style={{
-            fontFamily:
-              "'Big Shoulders Display', 'Impact', 'Arial Black', sans-serif"
-          }}
-        >
+      <div className="flex flex-shrink-0 items-center justify-between border-b-2 border-black bg-[#FFEB3B] p-4">
+        <h2 className="flex items-center gap-2 text-lg font-black text-black">
           {isLivePreview ? (
-            <span className="flex items-center gap-2">
-              <Clipboard className="h-6 w-6" /> LIVE PREVIEW
-            </span>
+            <>
+              <Clipboard className="h-5 w-5" /> Live Preview
+            </>
           ) : (
-            <span className="flex items-center gap-2">
-              <CheckCircle className="h-6 w-6" /> GENERATED PRD
-            </span>
+            <>
+              <CheckCircle className="h-5 w-5" /> Generated PRD
+            </>
           )}
         </h2>
         {!isLivePreview && (
-          <div className="flex flex-wrap items-center gap-2 space-x-2">
+          <div className="flex flex-wrap items-center gap-2">
             <button
               onClick={handleSave}
               disabled={isSaving || !prdInputs}
-              className="flex items-center border-[2px] border-black bg-[#FFEB3B] px-3 py-1 text-xs font-bold tracking-wide text-black uppercase shadow-[2px_2px_0px_#000] transition-all duration-150 hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[3px_3px_0px_#000] focus:outline-none active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_#000] disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex items-center border-2 border-black bg-white px-3 py-1.5 text-sm font-bold text-black shadow-[2px_2px_0px_#000] transition-all hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[3px_3px_0px_#000] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_#000] disabled:cursor-not-allowed disabled:opacity-50"
               title="Save to browser storage"
             >
               {isSaving ? (
                 <span className="flex items-center">
                   <svg
-                    className="mr-1 -ml-1 h-3 w-3 animate-spin"
+                    className="mr-1.5 -ml-1 h-3.5 w-3.5 animate-spin"
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
                     viewBox="0 0 24 24"
@@ -234,77 +228,64 @@ export function PRDDisplay({
                   Saving...
                 </span>
               ) : isSaved ? (
-                <span className="flex items-center">
-                  <CheckIcon className="mr-1 h-3 w-3" />
-                  Saved!
+                <span className="flex items-center text-[#4CAF50]">
+                  <CheckIcon className="mr-1.5 h-3.5 w-3.5" />
+                  Saved
                 </span>
               ) : (
                 <span className="flex items-center">
-                  <SaveIcon className="mr-1 h-3 w-3" />
+                  <SaveIcon className="mr-1.5 h-3.5 w-3.5" />
                   Save
                 </span>
               )}
             </button>
             <button
               onClick={handleDownload}
-              className="flex items-center border-[2px] border-black bg-[#4CAF50] px-3 py-1 text-xs font-bold tracking-wide text-white uppercase shadow-[2px_2px_0px_#000] transition-all duration-150 hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[3px_3px_0px_#000] focus:outline-none active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_#000]"
+              className="flex items-center border-2 border-black bg-[#2196F3] px-3 py-1.5 text-sm font-bold text-white shadow-[2px_2px_0px_#000] transition-all hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[3px_3px_0px_#000] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_#000]"
               title="Download as Markdown"
             >
-              <DownloadIcon className="mr-1 h-3 w-3" />
+              <DownloadIcon className="mr-1.5 h-3.5 w-3.5" />
               Download
             </button>
             <button
               onClick={handleCopy}
-              className="flex items-center border-[2px] border-black bg-[#2196F3] px-3 py-1 text-xs font-bold tracking-wide text-white uppercase shadow-[2px_2px_0px_#000] transition-all duration-150 hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[3px_3px_0px_#000] focus:outline-none active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_#000]"
+              className="flex items-center border-2 border-black bg-white px-3 py-1.5 text-sm font-bold text-black shadow-[2px_2px_0px_#000] transition-all hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[3px_3px_0px_#000] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_#000]"
               title="Copy to clipboard"
             >
               {isCopied ? (
-                <span className="flex items-center">
-                  <CheckIcon className="mr-1 h-3 w-3" />
-                  Copied!
+                <span className="flex items-center text-[#4CAF50]">
+                  <CheckIcon className="mr-1.5 h-3.5 w-3.5" />
+                  Copied
                 </span>
               ) : (
                 <span className="flex items-center">
-                  <CopyIcon className="mr-1 h-3 w-3" />
+                  <CopyIcon className="mr-1.5 h-3.5 w-3.5" />
                   Copy
                 </span>
               )}
             </button>
+            {onFullPageView && (
+              <button
+                onClick={onFullPageView}
+                className="flex items-center border-2 border-black bg-[#E91E63] px-3 py-1.5 text-sm font-bold text-white shadow-[2px_2px_0px_#000] transition-all hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[3px_3px_0px_#000] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_#000]"
+                title="View in full page"
+              >
+                <Eye className="mr-1.5 h-3.5 w-3.5" />
+                Full Page
+              </button>
+            )}
           </div>
         )}
       </div>
       <div
-        className={`neo-content-scrollable ${isLivePreview ? 'live-preview' : ''} ${isLivePreview ? 'flex-none' : 'flex-1'} min-h-0`}
+        className={`neo-content-scrollable ${isLivePreview ? 'live-preview' : ''} ${isLivePreview ? 'flex-none' : 'flex-1'} min-h-0 bg-white`}
       >
-        <div className="h-full bg-[#FAFAFA] p-4">
-          <div className="markdown-content h-full leading-relaxed font-medium text-black">
+        <div className="h-full p-6 sm:p-8">
+          <div className="markdown-content h-full">
             <MarkdownRenderer content={content} />
           </div>
         </div>
       </div>
-
-      {!isLivePreview && onFullPageView && (
-        <div
-          className="bg-opacity-60 pointer-events-none absolute top-[72px] right-0 bottom-0 left-0 flex cursor-pointer items-center justify-center bg-black opacity-0 transition-opacity duration-300 group-hover:pointer-events-auto group-hover:opacity-100"
-          onClick={onFullPageView}
-        >
-          <div className="hover-content scale-95 transform border-[4px] border-black bg-white p-8 shadow-[8px_8px_0px_#000] transition-all duration-300 group-hover:scale-100">
-            <Eye className="mx-auto mb-4 h-16 w-16 text-black transition-transform duration-300 group-hover:scale-110" />
-            <h3
-              className="mb-3 text-center text-2xl font-black tracking-wide text-black uppercase transition-transform duration-300 group-hover:scale-105"
-              style={{
-                fontFamily:
-                  "'Big Shoulders Display', 'Impact', 'Arial Black', sans-serif"
-              }}
-            >
-              Click to Read Full Document
-            </h3>
-            <p className="text-center text-sm font-medium text-black transition-transform duration-300 group-hover:scale-105">
-              Open in full page view for better reading experience
-            </p>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

@@ -82,6 +82,7 @@ We will measure success through the following Key Performance Indicators:
 The essential features for the Minimum Viable Product are:
 
 - **Compact Neo-Brutalism Interactive Form Interface**: Structured form with key PRD sections (product name, problem statement, solution, target audience, core features, business goals, future features, tech stack, constraints) designed with updated compact Neo-Brutalism aesthetics featuring refined 2px borders, optimized spacing, and efficient use of screen real estate
+- **Product Mode Selection**: Ability to choose between SaaS Product, AI Product, Mobile App, and Feature Enhancement modes to get contextually relevant PRDs and prefilled forms.
 - **AI-Powered PRD Generation**: Integration with Google Gemini AI (including gemini-2.5-flash model) to generate comprehensive PRDs from user inputs with real-time model selection
 - **Live Preview with Compact Neo-Brutalism Styling**: Real-time preview of PRD content as users input information, styled with updated compact Neo-Brutalism design principles for better content density
 - **Multi-format Export Functionality**: Ability to download generated PRDs as Markdown files with automatic filename generation and copy-to-clipboard functionality

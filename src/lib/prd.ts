@@ -8,6 +8,12 @@ export interface ImageAttachment {
   uploadedAt: Date;
 }
 
+export type ProductMode =
+  | 'SaaS Product'
+  | 'AI Product'
+  | 'Mobile App'
+  | 'Feature Enhancement';
+
 export interface PrdInput {
   productName: string;
   targetAudience: string;
@@ -20,6 +26,9 @@ export interface PrdInput {
   futureFeatures: string;
   techStack: string;
   constraints: string;
+  productMode: ProductMode;
+  currentState?: string;
+  proposedChanges?: string;
   productIdeaImages?: ImageAttachment[];
 }
 
@@ -35,6 +44,9 @@ export const DEFAULT_PRD_INPUT: PrdInput = {
   futureFeatures: '',
   techStack: '',
   constraints: '',
+  productMode: 'SaaS Product',
+  currentState: '',
+  proposedChanges: '',
   productIdeaImages: []
 };
 
@@ -44,9 +56,10 @@ export const SECTION_FIELD_MAPPING: Record<string, Array<keyof PrdInput>> = {
     'problemStatement',
     'proposedSolution'
   ],
-  '2. Audience & Market': ['targetAudience', 'businessGoals'],
-  '3. Features & Scope': ['coreFeatures', 'futureFeatures'],
-  '4. Technical Details (Optional)': ['techStack', 'constraints']
+  '2. Enhancement Scope': ['currentState', 'proposedChanges'],
+  '3. Audience & Market': ['targetAudience', 'businessGoals'],
+  '4. Features & Scope': ['coreFeatures', 'futureFeatures'],
+  '5. Technical Details (Optional)': ['techStack', 'constraints']
 };
 
 export function generatePreviewMarkdown(inputs: PrdInput): string {
@@ -139,10 +152,31 @@ export function buildGenerationPrompt(inputs: PrdInput): string {
       "\nPlease consider these visual materials when writing the PRD. They provide important context about the user's vision for the product design, user interface, and functionality.";
   }
 
+  const isEnhancement = inputs.productMode === 'Feature Enhancement';
+  const enhancementSection = isEnhancement
+    ? `
+---
+
+### 2. Feature Enhancement: Before vs After
+
+**2.1. Current State (Before)**
+*The current implementation or feature set is:*
+${inputs.currentState || 'Not specified.'}
+
+**2.2. Proposed Changes (After)**
+*The proposed enhancements or changes are:*
+${inputs.proposedChanges || 'Not specified.'}
+
+**2.3. Gap Analysis & Rationale**
+*Based on the before and after states, provide a brief gap analysis and the rationale for this enhancement.*
+`
+    : '';
+
   return `
-You are an expert Senior Product Manager at a leading tech company. Your task is to write a comprehensive Product Requirements Document (PRD) based on the following information. The PRD should be well-structured, clear, professional, and detailed, suitable for a development team to start working from. Format the output in clean Markdown.
+You are an expert Senior Product Manager at a leading tech company. Your task is to write a comprehensive Product Requirements Document (PRD) for a **${inputs.productMode}**. The PRD should be well-structured, clear, professional, and detailed, suitable for a development team to start working from. Format the output in clean Markdown.
 
 **Product Name:** ${inputs.productName}${imageContext}
+**Product Category:** ${inputs.productMode}
 
 ---
 
@@ -158,60 +192,60 @@ ${inputs.proposedSolution}
 
 **1.3. Vision**
 *Based on the problem and solution, generate a compelling long-term vision for this product.*
-
+${enhancementSection}
 ---
 
-### 2. Target Audience & User Personas
+### ${isEnhancement ? '3' : '2'}. Target Audience & User Personas
 
-**2.1. Primary Audience**
+**${isEnhancement ? '3' : '2'}.1. Primary Audience**
 *The primary users for this product are:*
 ${inputs.targetAudience}
 
-**2.2. User Personas**
+**${isEnhancement ? '3' : '2'}.2. User Personas**
 *Based on the target audience, generate 2-3 brief but distinct user personas. For each persona, include their goals and frustrations related to the problem statement.*
 
 ---
 
-### 3. Product Goals & Success Metrics
+### ${isEnhancement ? '4' : '3'}. Product Goals & Success Metrics
 
-**3.1. Business Goals**
+**${isEnhancement ? '4' : '3'}.1. Business Goals**
 *The key business objectives for this product are:*
 ${inputs.businessGoals || 'Not specified. Generate reasonable business goals like user acquisition, engagement, and revenue generation.'}
 
-**3.2. Success Metrics (KPIs)**
+**${isEnhancement ? '4' : '3'}.2. Success Metrics (KPIs)**
 *We will measure success through the following Key Performance Indicators:*
 *Based on the business goals, generate specific, measurable, achievable, relevant, and time-bound (SMART) KPIs.*
 
 ---
 
-### 4. Features & Requirements
+### ${isEnhancement ? '5' : '4'}. Features & Requirements
 
-**4.1. Core Features (MVP)**
+**${isEnhancement ? '5' : '4'}.1. Core Features (MVP)**
 *The essential features for the Minimum Viable Product are:*
 ${inputs.coreFeatures}
 
-**4.2. User Stories**
+**${isEnhancement ? '5' : '4'}.2. User Stories**
 *For each core feature listed above, write 2-3 detailed user stories in the format: "As a [user type], I want to [action], so that I can [benefit]."*
 
-**4.3. Future Features (Post-MVP)**
+**${isEnhancement ? '5' : '4'}.3. Future Features (Post-MVP)**
 *Potential features for future releases include:*
 ${inputs.futureFeatures || 'Not specified. Brainstorm 2-4 logical feature enhancements for future consideration.'}
 
 ---
 
-### 5. Technical Considerations & Constraints
+### ${isEnhancement ? '6' : '5'}. Technical Considerations & Constraints
 
-**5.1. Technology Stack**
+**${isEnhancement ? '6' : '5'}.1. Technology Stack**
 *The proposed or existing technology stack is:*
 ${inputs.techStack || 'Not specified.'}
 
-**5.2. Constraints & Dependencies**
+**${isEnhancement ? '6' : '5'}.2. Constraints & Dependencies**
 *Known limitations and dependencies are:*
 ${inputs.constraints || 'None specified.'}
 
 ---
 
-### 6. Out of Scope
+### ${isEnhancement ? '7' : '6'}. Out of Scope
 
 *To ensure focus for the initial release, the following items are explicitly out of scope for the MVP:*
 *Based on the core features, define what will NOT be included in the initial release to manage expectations.*

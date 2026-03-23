@@ -76,13 +76,18 @@ export default function Home() {
     setShowSetupPrompt(false);
   };
 
-  const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1);
+  const [currentStep, setCurrentStep] = useState<1 | 2 | 3 | 4>(1);
 
   const handleLoadDraft = (draft: StoredDraft) => {
-    setPrdInput(draft.inputs);
+    // Ensure all required fields exist (especially for older drafts)
+    const sanitizedInputs = {
+      ...DEFAULT_PRD_INPUT,
+      ...draft.inputs
+    };
+    setPrdInput(sanitizedInputs);
     setGeneratedPrd(draft.markdown);
     setSelectedModel(draft.model);
-    setCurrentStep(3); // Switch to step 3 to show the loaded PRD
+    setCurrentStep(4); // Switch to last step to show the loaded PRD
   };
 
   const handleResetState = () => {
@@ -96,44 +101,46 @@ export default function Home() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#F5F5F5]">
+    <div className="flex min-h-screen flex-col bg-gray-50/50">
       <Header
         onSettingsClick={() => setIsSettingsOpen(true)}
         onSavedDraftsClick={() => setIsSavedDraftsOpen(true)}
       />
 
-      <main className="container mx-auto min-h-0 flex-grow px-4 py-4">
+      <main className="container mx-auto min-h-0 flex-grow px-4 py-8">
         <div className="mx-auto flex h-full min-h-0 max-w-7xl flex-col">
           {/* Setup Prompt Banner */}
           {showSetupPrompt && (
-            <div className="mb-6 border-[3px] border-black bg-[#FFEB3B] p-6 shadow-[6px_6px_0px_#000]">
+            <div className="mb-6 border-4 border-black bg-[#FFEB3B] p-6 shadow-[4px_4px_0px_#000]">
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div className="flex items-center">
-                  <svg
-                    className="mr-4 h-8 w-8 flex-shrink-0 text-black"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2.5}
-                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
+                  <div className="mr-4 flex h-12 w-12 flex-shrink-0 items-center justify-center border-2 border-black bg-white shadow-[2px_2px_0px_#000]">
+                    <svg
+                      className="h-8 w-8 text-[#2196F3]"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                  </div>
                   <div>
-                    <h3 className="mb-1 text-lg font-bold tracking-wide text-black uppercase">
+                    <h3 className="mb-1 text-lg font-black tracking-wide text-black uppercase">
                       Setup Required
                     </h3>
-                    <p className="font-medium text-black">
+                    <p className="font-bold text-black">
                       Add your Gemini API key to start generating PRDs
                     </p>
                   </div>
                 </div>
                 <button
                   onClick={() => setIsSettingsOpen(true)}
-                  className="flex items-center border-[2px] border-black bg-white px-4 py-2 font-bold tracking-wide text-black uppercase shadow-[2px_2px_0px_#000] transition-all duration-150 hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[3px_3px_0px_#000] focus:outline-none active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_#000]"
+                  className="border-2 border-black bg-[#2196F3] px-6 py-3 font-bold text-white shadow-[4px_4px_0px_#000] transition-all hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_#000] focus:ring-2 focus:ring-[#2196F3] focus:ring-offset-2 focus:outline-none active:translate-x-[2px] active:translate-y-[2px] active:shadow-[2px_2px_0px_#000]"
                 >
                   Configure API Key
                 </button>
@@ -142,7 +149,7 @@ export default function Home() {
           )}
 
           {/* Main Content - Wizard Only */}
-          <div className="mx-auto max-w-6xl">
+          <div className="mx-auto w-full max-w-6xl">
             <PRDWizard
               apiKey={apiKey}
               selectedModel={selectedModel}
@@ -190,6 +197,13 @@ export default function Home() {
         content={generatedPrd}
         productName={prdInput.productName || 'PRD'}
         model={selectedModel}
+        productMode={prdInput.productMode}
+        prdInput={prdInput}
+        apiKey={apiKey}
+        onUpdatePRD={(newPrd, newInputs) => {
+          setGeneratedPrd(newPrd);
+          setPrdInput(newInputs);
+        }}
       />
     </div>
   );

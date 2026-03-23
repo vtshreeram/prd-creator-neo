@@ -8,7 +8,8 @@ import {
   StoredDraft,
   migrateLocalStorageToIndexedDB
 } from '@/lib/drafts';
-import { Save, Calendar, Bot } from 'lucide-react';
+import { Save, Calendar, Bot, X, Trash2 } from 'lucide-react';
+import { Button } from './button';
 
 interface SavedDraftsModalProps {
   isOpen: boolean;
@@ -79,41 +80,21 @@ export function SavedDraftsModal({
   return (
     <Dialog.Root open={isOpen} onOpenChange={onClose}>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 z-[100] bg-black/50" />
-        <Dialog.Content className="fixed top-[50%] left-[50%] z-[101] max-h-[85vh] w-[95vw] max-w-3xl translate-x-[-50%] translate-y-[-50%] overflow-hidden border-[3px] border-black bg-white shadow-[8px_8px_0px_#000] focus:outline-none">
+        <Dialog.Overlay className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm transition-opacity" />
+        <Dialog.Content className="fixed top-[50%] left-[50%] z-[101] max-h-[85vh] w-[95vw] max-w-2xl translate-x-[-50%] translate-y-[-50%] overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xl focus:outline-none">
           <div className="flex h-full max-h-[85vh] flex-col">
             {/* Header */}
-            <div className="border-b-[3px] border-black bg-[#FFEB3B] p-6">
+            <div className="border-b border-gray-100 bg-gray-50/50 p-6">
               <div className="flex items-center justify-between">
-                <Dialog.Title
-                  className="text-2xl font-black tracking-wide text-black uppercase"
-                  style={{
-                    fontFamily:
-                      "'Big Shoulders Display', 'Impact', 'Arial Black', sans-serif"
-                  }}
-                >
-                  <span className="flex items-center gap-2">
-                    <Save className="h-5 w-5" />
-                    Saved PRDs
-                  </span>
+                <Dialog.Title className="flex items-center gap-2 text-xl font-semibold text-gray-900">
+                  <Save className="h-5 w-5 text-gray-500" />
+                  Saved PRDs
                 </Dialog.Title>
-                <Dialog.Close className="text-black transition-colors hover:text-gray-700">
-                  <svg
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="3"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                  </svg>
+                <Dialog.Close className="rounded-full p-1 text-gray-500 hover:bg-gray-100 hover:text-gray-900">
+                  <X className="h-5 w-5" />
                 </Dialog.Close>
               </div>
-              <p className="mt-2 text-sm font-medium text-black">
+              <p className="mt-1 text-sm text-gray-500">
                 {drafts.length} saved PRD{drafts.length !== 1 ? 's' : ''} (max
                 12)
               </p>
@@ -123,68 +104,60 @@ export function SavedDraftsModal({
             <div className="flex-1 overflow-y-auto p-6">
               {isLoading ? (
                 <div className="flex flex-col items-center justify-center py-12">
-                  <div className="mb-4 h-12 w-12 animate-spin rounded-full border-4 border-black border-t-transparent"></div>
-                  <p className="font-bold text-black">Loading drafts...</p>
+                  <div className="mb-4 h-8 w-8 animate-spin rounded-full border-2 border-gray-300 border-t-blue-600"></div>
+                  <p className="text-sm font-medium text-gray-500">
+                    Loading drafts...
+                  </p>
                 </div>
               ) : drafts.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-12 text-center">
-                  <svg
-                    className="mb-4 h-16 w-16 text-gray-400"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                    />
-                  </svg>
-                  <h3 className="mb-2 text-xl font-bold text-black">
+                  <Save className="mb-4 h-12 w-12 text-gray-300" />
+                  <h3 className="mb-1 text-lg font-medium text-gray-900">
                     No Saved PRDs
                   </h3>
-                  <p className="font-medium text-gray-600">
-                    Generate and save your first PRD to see it here!
+                  <p className="text-sm text-gray-500">
+                    Generate and save your first PRD to see it here.
                   </p>
                 </div>
               ) : (
-                <div className="space-y-4">
+                <div className="grid gap-4 sm:grid-cols-2">
                   {drafts.map((draft) => (
                     <div
                       key={draft.id}
                       onClick={() => handleLoadDraft(draft)}
-                      className="cursor-pointer border-[3px] border-black bg-white p-4 shadow-[4px_4px_0px_#000] transition-all duration-150 hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_#000]"
+                      className="group relative flex cursor-pointer flex-col rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition-all hover:border-blue-500 hover:shadow-md"
                     >
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <h3 className="mb-1 text-lg font-bold text-black">
-                            {draft.title}
-                          </h3>
-                          <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm font-medium text-gray-600">
-                            <span className="flex items-center gap-1">
-                              <Calendar className="h-3 w-3" />
-                              {formatDate(draft.createdAt)}
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <Bot className="h-3 w-3" />
-                              {draft.model}
-                            </span>
-                          </div>
-                          {draft.inputs.problemStatement && (
-                            <p className="mt-2 line-clamp-2 text-sm font-medium text-gray-700">
-                              {draft.inputs.problemStatement}
-                            </p>
-                          )}
-                        </div>
+                      <div className="mb-3 flex items-start justify-between gap-4">
+                        <h3 className="line-clamp-2 font-semibold text-gray-900">
+                          {draft.title}
+                        </h3>
                         <button
                           onClick={(e) => handleDelete(draft.id, e)}
                           disabled={deletingId === draft.id}
-                          className="ml-4 border-[3px] border-black bg-[#F44336] px-3 py-2 text-sm font-bold text-white uppercase shadow-[2px_2px_0px_#000] transition-all duration-150 hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[4px_4px_0px_#000] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_#000] disabled:cursor-not-allowed disabled:opacity-50"
+                          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-gray-400 opacity-0 transition-all group-hover:opacity-100 hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
                           title="Delete draft"
                         >
-                          {deletingId === draft.id ? '...' : 'Delete'}
+                          <Trash2 className="h-4 w-4" />
                         </button>
+                      </div>
+
+                      {draft.inputs.problemStatement && (
+                        <p className="mb-4 line-clamp-2 text-sm text-gray-500">
+                          {draft.inputs.problemStatement}
+                        </p>
+                      )}
+
+                      <div className="mt-auto flex flex-wrap items-center gap-x-4 gap-y-2 text-xs font-medium text-gray-500">
+                        <span className="flex items-center gap-1.5">
+                          <Calendar className="h-3.5 w-3.5 text-gray-400" />
+                          {formatDate(draft.createdAt)}
+                        </span>
+                        <span className="flex items-center gap-1.5">
+                          <Bot className="h-3.5 w-3.5 text-gray-400" />
+                          <span className="max-w-[100px] truncate">
+                            {draft.model}
+                          </span>
+                        </span>
                       </div>
                     </div>
                   ))}
@@ -193,14 +166,11 @@ export function SavedDraftsModal({
             </div>
 
             {/* Footer */}
-            <div className="border-t-[3px] border-black bg-[#F5F5F5] p-6">
-              <div className="flex justify-end gap-3">
-                <button
-                  onClick={onClose}
-                  className="border-[3px] border-black bg-white px-6 py-3 font-bold tracking-wide text-black uppercase shadow-[4px_4px_0px_#000] transition-all duration-150 hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_#000] active:translate-x-[2px] active:translate-y-[2px] active:shadow-[2px_2px_0px_#000]"
-                >
+            <div className="border-t border-gray-100 bg-gray-50/50 p-4 sm:px-6">
+              <div className="flex justify-end">
+                <Button variant="outline" onClick={onClose}>
                   Close
-                </button>
+                </Button>
               </div>
             </div>
           </div>

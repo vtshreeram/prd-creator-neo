@@ -5,18 +5,20 @@ import { getContextHeader } from '../_lib/datetime';
 
 export async function POST(request: NextRequest) {
   try {
-    const { productIdea, images, apiKey, model } = (await request.json()) as {
-      productIdea?: string;
-      images?: Array<{
-        id: string;
-        name: string;
-        type: string;
-        size: number;
-        data: string;
-      }>;
-      apiKey?: string;
-      model?: string;
-    };
+    const { productIdea, images, productMode, apiKey, model } =
+      (await request.json()) as {
+        productIdea?: string;
+        images?: Array<{
+          id: string;
+          name: string;
+          type: string;
+          size: number;
+          data: string;
+        }>;
+        productMode?: string;
+        apiKey?: string;
+        model?: string;
+      };
 
     if (!apiKey || typeof apiKey !== 'string') {
       return NextResponse.json(
@@ -47,7 +49,11 @@ export async function POST(request: NextRequest) {
         "\n\nPlease consider these visual materials when analyzing the product idea. They may contain mockups, wireframes, diagrams, or reference photos that provide additional context about the user's vision.";
     }
 
-    const basePrompt = `You are a brilliant product strategist. A user has provided a high-level product idea. Your task is to analyze this idea and break it down into the foundational components of a Product Requirements Document. Based on the idea, generate a plausible product name, identify a specific target audience, formulate a clear problem statement and a corresponding solution, brainstorm core features for an MVP, identify key differentiating features, suggest business goals and specific success metrics (KPIs), and recommend future features and tech stack.
+    const modeInstructions = productMode
+      ? `Specifically tailored for a ${productMode} product.`
+      : '';
+
+    const basePrompt = `You are a brilliant product strategist. A user has provided a high-level product idea. Your task is to analyze this idea and break it down into the foundational components of a Product Requirements Document. ${modeInstructions} Based on the idea, generate a plausible product name, identify a specific target audience, formulate a clear problem statement and a corresponding solution, brainstorm core features for an MVP, identify key differentiating features, suggest business goals and specific success metrics (KPIs), and recommend future features and tech stack.
 
 User's Idea: "${productIdea}"${imageContext}
 
@@ -74,7 +80,9 @@ Return the response as a JSON object that strictly adheres to the provided schem
             successMetrics: { type: Type.STRING },
             futureFeatures: { type: Type.STRING },
             techStack: { type: Type.STRING },
-            constraints: { type: Type.STRING }
+            constraints: { type: Type.STRING },
+            currentState: { type: Type.STRING },
+            proposedChanges: { type: Type.STRING }
           },
           required: [
             'productName',
@@ -111,7 +119,12 @@ Return the response as a JSON object that strictly adheres to the provided schem
       successMetrics: parsed.successMetrics || DEFAULT_PRD_INPUT.successMetrics,
       futureFeatures: parsed.futureFeatures || DEFAULT_PRD_INPUT.futureFeatures,
       techStack: parsed.techStack || DEFAULT_PRD_INPUT.techStack,
-      constraints: parsed.constraints || DEFAULT_PRD_INPUT.constraints
+      constraints: parsed.constraints || DEFAULT_PRD_INPUT.constraints,
+      productMode:
+        (productMode as PrdInput['productMode']) ||
+        DEFAULT_PRD_INPUT.productMode,
+      currentState: parsed.currentState || '',
+      proposedChanges: parsed.proposedChanges || ''
     };
 
     return NextResponse.json({ data: result });

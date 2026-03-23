@@ -7,7 +7,9 @@ import {
   Sparkles,
   Edit3,
   FileText,
-  Camera
+  Camera,
+  MessageSquare,
+  RefreshCw
 } from 'lucide-react';
 import { PrdInput, DEFAULT_PRD_INPUT, ImageAttachment } from '@/lib/prd';
 import { Button } from './button';
@@ -22,8 +24,8 @@ interface PRDWizardProps {
   modelDisplayName: string;
   onGeneratedPRD: (prd: string, inputs: PrdInput) => void;
   onFullPageView?: () => void;
-  currentStep?: 1 | 2 | 3;
-  setCurrentStep?: (step: 1 | 2 | 3) => void;
+  currentStep?: 1 | 2 | 3 | 4;
+  setCurrentStep?: (step: 1 | 2 | 3 | 4) => void;
   generatedPrd?: string;
   prdInput?: PrdInput;
   onResetState?: () => void;
@@ -42,7 +44,9 @@ export function PRDWizard({
   onResetState
 }: PRDWizardProps) {
   // Use external state if provided (when loading from saved drafts), otherwise use internal state
-  const [internalCurrentStep, setInternalCurrentStep] = useState<1 | 2 | 3>(1);
+  const [internalCurrentStep, setInternalCurrentStep] = useState<1 | 2 | 3 | 4>(
+    1
+  );
   const [internalPrdInput, setInternalPrdInput] =
     useState<PrdInput>(DEFAULT_PRD_INPUT);
   const [internalGeneratedPrd, setInternalGeneratedPrd] = useState<string>('');
@@ -59,6 +63,13 @@ export function PRDWizard({
   const [productIdeaImages, setProductIdeaImages] = useState<ImageAttachment[]>(
     []
   );
+  const [clarificationQuestions, setClarificationQuestions] = useState<
+    string[]
+  >([]);
+  const [userClarificationAnswers, setUserClarificationAnswers] = useState<
+    string[]
+  >([]);
+  const [isClarifying, setIsClarifying] = useState<boolean>(false);
   const [isPrefilling, setIsPrefilling] = useState<boolean>(false);
   const [prefillError, setPrefillError] = useState<string>('');
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
@@ -73,12 +84,18 @@ export function PRDWizard({
     },
     {
       id: 2,
+      title: 'Clarification',
+      description: 'AI-guided deep dive',
+      icon: MessageSquare
+    },
+    {
+      id: 3,
       title: 'Auto-fill & Edit',
       description: 'Review and customize details',
       icon: Edit3
     },
     {
-      id: 3,
+      id: 4,
       title: 'PRD Preview',
       description: 'Your generated document',
       icon: FileText
@@ -88,7 +105,7 @@ export function PRDWizard({
   const handleIdeaSubmit = async () => {
     if (!productIdea.trim()) return;
 
-    setIsPrefilling(true);
+    setIsClarifying(true);
     setPrefillError('');
 
     // Convert images to base64 for API transmission
@@ -103,7 +120,7 @@ export function PRDWizard({
     );
 
     try {
-      const response = await fetch('/api/prefill', {
+      const response = await fetch('/api/clarify', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -111,6 +128,72 @@ export function PRDWizard({
         body: JSON.stringify({
           productIdea: productIdea.trim(),
           images: imageData,
+          productMode: prdInput.productMode,
+          apiKey,
+          model: selectedModel
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to generate questions');
+      }
+
+      const { data } = await response.json();
+      setClarificationQuestions(data);
+      setUserClarificationAnswers(new Array(data.length).fill(''));
+      setCurrentStep(2);
+    } catch (err) {
+      setPrefillError(
+        err instanceof Error
+          ? err.message
+          : 'An error occurred while clarifying the idea.'
+      );
+    } finally {
+      setIsClarifying(false);
+    }
+  };
+
+  const handleClarificationSubmit = async () => {
+    setIsPrefilling(true);
+    setPrefillError('');
+
+    // Convert images to base64 for API transmission
+    const imageData = await Promise.all(
+      productIdeaImages.map(async (img) => ({
+        id: img.id,
+        name: img.name,
+        type: img.type,
+        size: img.size,
+        data: img.preview // This is already base64 from the FileReader
+      }))
+    );
+
+    // Combine idea with clarification context
+    const enrichedIdea = `
+Initial Idea: ${productIdea}
+
+Additional Context:
+${clarificationQuestions
+  .map((q, i) =>
+    userClarificationAnswers[i]
+      ? `Q: ${q}\nA: ${userClarificationAnswers[i]}`
+      : ''
+  )
+  .filter(Boolean)
+  .join('\n\n')}
+    `.trim();
+
+    try {
+      const response = await fetch('/api/prefill', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          productIdea: enrichedIdea,
+          images: imageData,
+          productMode: prdInput.productMode,
           apiKey,
           model: selectedModel
         })
@@ -124,7 +207,7 @@ export function PRDWizard({
       const responseJson = await response.json();
       const { data } = responseJson;
       setInternalPrdInput(data);
-      setCurrentStep(2);
+      setCurrentStep(3);
     } catch (err) {
       setPrefillError(
         err instanceof Error
@@ -167,7 +250,7 @@ export function PRDWizard({
       const { data } = await response.json();
       setInternalGeneratedPrd(data.prd);
       onGeneratedPRD(data.prd, prdInput);
-      setCurrentStep(3);
+      setCurrentStep(4);
     } catch (err) {
       setGenerateError(
         err instanceof Error
@@ -187,23 +270,25 @@ export function PRDWizard({
   };
 
   const canGoToStep2 = productIdea.trim().length > 0;
-  const canGoToStep3 =
+  const canGoToStep4 =
     prdInput.productName.trim().length > 0 &&
     prdInput.problemStatement.trim().length > 0;
 
   const handleNext = () => {
     if (currentStep === 1 && canGoToStep2) {
       handleIdeaSubmit();
-    } else if (currentStep === 2 && canGoToStep3) {
+    } else if (currentStep === 2) {
+      handleClarificationSubmit();
+    } else if (currentStep === 3 && canGoToStep4) {
       handleGeneratePRD();
-    } else if (currentStep === 3) {
+    } else if (currentStep === 4) {
       handleFinish();
     }
   };
 
   const handlePrevious = () => {
     if (currentStep > 1) {
-      setCurrentStep((currentStep - 1) as 1 | 2);
+      setCurrentStep((currentStep - 1) as 1 | 2 | 3);
     }
   };
 
@@ -218,6 +303,8 @@ export function PRDWizard({
     setCurrentStep(1);
     setProductIdea('');
     setProductIdeaImages([]);
+    setClarificationQuestions([]);
+    setUserClarificationAnswers([]);
     if (externalPrdInput) {
       // If using external state, notify parent to reset
       onResetState?.();
@@ -238,25 +325,33 @@ export function PRDWizard({
     if (stepId === 1) {
       setCurrentStep(1);
       // Reset to fresh state when going back to step 1 from a loaded draft
-      if (externalPrdInput && currentStep === 3) {
+      if (externalPrdInput && currentStep === 4) {
         onResetState?.();
       }
     } else if (stepId === 2 && canGoToStep2) {
       setCurrentStep(2);
-    } else if (stepId === 3 && canGoToStep3) {
+    } else if (stepId === 3 && canGoToStep2) {
       setCurrentStep(3);
+    } else if (stepId === 4 && canGoToStep4) {
+      setCurrentStep(4);
     }
   };
 
+  const handleAnswerChange = (index: number, answer: string) => {
+    const nextAnswers = [...userClarificationAnswers];
+    nextAnswers[index] = answer;
+    setUserClarificationAnswers(nextAnswers);
+  };
+
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col">
+    <div className="mx-auto flex w-full max-w-6xl flex-col bg-white">
       {/* Progress Steps */}
-      <div className="mb-8">
+      <div className="mb-8 p-4">
         <div className="relative">
           {/* Background Progress Line */}
-          <div className="absolute top-6 right-0 left-0 h-1 bg-gray-300">
+          <div className="absolute top-8 right-0 left-0 h-2 border-2 border-black bg-gray-200">
             <div
-              className="h-1 bg-[#4CAF50] transition-all duration-500"
+              className="h-full border-r-2 border-black bg-[#FFEB3B] transition-all duration-500"
               style={{
                 width: `${((currentStep - 1) / (steps.length - 1)) * 100}%`
               }}
@@ -272,53 +367,52 @@ export function PRDWizard({
               const isClickable =
                 step.id === 1 ||
                 (step.id === 2 && canGoToStep2) ||
-                (step.id === 3 && canGoToStep3);
+                (step.id === 3 && canGoToStep2) ||
+                (step.id === 4 && canGoToStep4);
 
               return (
                 <div key={step.id} className="flex flex-col items-center">
                   <button
                     onClick={() => isClickable && handleStepClick(step.id)}
                     disabled={!isClickable}
-                    className={`relative z-10 flex h-14 w-14 transform items-center justify-center rounded-full border-[4px] transition-all duration-300 ${
+                    className={`relative z-10 flex h-16 w-16 transform items-center justify-center border-4 transition-all duration-300 ${
                       isActive
-                        ? 'scale-110 border-black bg-[#FFEB3B] shadow-[6px_6px_0px_#000]'
+                        ? 'border-black bg-[#FFEB3B] shadow-[4px_4px_0px_#000]'
                         : isCompleted
-                          ? 'border-black bg-[#4CAF50] shadow-[4px_4px_0px_#000] hover:scale-105'
+                          ? 'border-black bg-[#4CAF50] text-white shadow-[4px_4px_0px_#000]'
                           : isClickable
-                            ? 'border-black bg-white shadow-[4px_4px_0px_#000] hover:-translate-x-[2px] hover:-translate-y-[2px] hover:scale-105 hover:shadow-[6px_6px_0px_#000]'
-                            : 'cursor-not-allowed border-gray-400 bg-gray-200'
+                            ? 'border-black bg-white hover:bg-gray-50 hover:shadow-[2px_2px_0px_#000]'
+                            : 'cursor-not-allowed border-gray-300 bg-gray-100'
                     } `}
                   >
+                    <span
+                      className={`absolute -top-6 text-xs font-black ${isActive ? 'text-black' : isCompleted ? 'text-black' : 'text-gray-400'}`}
+                    >
+                      {String(step.id).padStart(2, '0')}
+                    </span>
                     <Icon
-                      className={`h-7 w-7 ${isActive || isCompleted ? 'text-black' : 'text-gray-500'}`}
+                      className={`h-6 w-6 ${
+                        isActive
+                          ? 'text-black'
+                          : isCompleted
+                            ? 'text-white'
+                            : 'text-gray-400'
+                      }`}
                     />
-                    {isCompleted && (
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="h-4 w-4 rounded-full bg-black"></div>
-                      </div>
-                    )}
                   </button>
-                  <div className="mt-4 text-center">
+                  <div className="mt-6 text-center">
                     <p
-                      className={`text-sm font-bold tracking-wide uppercase ${
+                      className={`text-sm font-black tracking-wide uppercase ${
                         isActive
                           ? 'text-black'
                           : isCompleted
                             ? 'text-[#4CAF50]'
-                            : 'text-gray-500'
+                            : 'text-gray-400'
                       }`}
-                      style={{
-                        fontFamily:
-                          "'Big Shoulders Display', 'Impact', 'Arial Black', sans-serif"
-                      }}
                     >
                       {step.title}
                     </p>
-                    <p
-                      className={`mt-1 text-xs ${
-                        isActive ? 'text-black' : 'text-gray-500'
-                      }`}
-                    >
+                    <p className="mt-1 text-xs font-medium text-gray-500 sm:block">
                       {step.description}
                     </p>
                   </div>
@@ -331,81 +425,106 @@ export function PRDWizard({
 
       {/* Model Info */}
       <div className="mb-6 flex justify-center">
-        <div className="model-info-badge inline-flex items-center border-[4px] border-black bg-[#FFEB3B] px-4 py-2 shadow-[4px_4px_0px_#000]">
-          <div className="flex items-center space-x-3">
-            <div className="h-3 w-3 animate-pulse rounded-full bg-[#4CAF50]"></div>
-            <div className="text-left">
-              <p className="text-xs font-bold text-black uppercase">
-                Currently Using:
-              </p>
-              <p className="text-sm font-black">
-                {modelDisplayName || selectedModel}
-              </p>
-            </div>
+        <div className="inline-flex items-center border-2 border-black bg-[#FFEB3B] px-4 py-1.5 text-sm font-bold shadow-[2px_2px_0px_#000]">
+          <div className="flex items-center space-x-2">
+            <div className="h-2 w-2 animate-pulse rounded-full bg-black"></div>
+            <span className="text-black">Model:</span>
+            <span className="text-black">
+              {modelDisplayName || selectedModel}
+            </span>
           </div>
         </div>
       </div>
 
       {/* Sticky Navigation Bar */}
-      <div className="sticky right-0 bottom-0 left-0 z-40 border-t-[4px] border-black bg-white shadow-[0_-4px_0px_#000]">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <Button
-              variant="ghost"
-              onClick={handlePrevious}
-              disabled={currentStep === 1}
-              className="flex items-center gap-2 px-6 py-3"
-            >
-              <ArrowLeft className="h-5 w-5" />
-              Previous
-            </Button>
+      <div className="sticky top-0 z-40 mb-6 border-4 border-black bg-white p-4 shadow-[4px_4px_0px_#000]">
+        <div className="flex items-center justify-between">
+          <Button
+            variant="outline"
+            onClick={handlePrevious}
+            disabled={currentStep === 1}
+            className="flex items-center gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Previous
+          </Button>
 
-            <div className="flex items-center gap-4 text-lg font-bold text-black">
-              <span>Step {currentStep}</span>
-              <span className="text-gray-500">of {steps.length}</span>
-            </div>
-
-            <Button
-              variant="secondary"
-              onClick={handleNext}
-              disabled={
-                (currentStep === 1 && !canGoToStep2) ||
-                (currentStep === 2 && isGenerating)
-              }
-              isLoading={isPrefilling || isGenerating}
-              className="flex items-center gap-2 px-6 py-3"
-            >
-              {currentStep === 3 ? 'Start New Idea' : 'Next'}
-              {currentStep < 3 && <ArrowRight className="h-5 w-5" />}
-            </Button>
+          <div className="flex items-center gap-2 text-sm font-black tracking-wide uppercase">
+            <span className="text-lg text-black">Step {currentStep}</span>
+            <span className="text-gray-400">/ {steps.length}</span>
           </div>
+
+          <Button
+            variant="primary"
+            onClick={handleNext}
+            disabled={
+              (currentStep === 1 && !canGoToStep2) ||
+              (currentStep === 3 && isGenerating)
+            }
+            isLoading={isClarifying || isPrefilling || isGenerating}
+            className="flex items-center gap-2"
+          >
+            {currentStep === 4 ? 'Start New Idea' : 'Next'}
+            {currentStep < 4 && <ArrowRight className="h-4 w-4" />}
+          </Button>
         </div>
       </div>
 
       {/* Step Content */}
-      <div className="min-h-[500px] rounded-none border-[4px] border-black bg-white p-8 pb-20 shadow-[6px_6px_0px_#000]">
+      <div className="min-h-[500px] border-4 border-black bg-white p-6 shadow-[6px_6px_0px_#000] sm:p-10">
         {currentStep === 1 && (
           <div className="mx-auto max-w-3xl space-y-8">
             <div className="text-center">
-              <div className="mb-6 inline-flex h-16 w-16 items-center justify-center border-[4px] border-black bg-[#FFEB3B] shadow-[4px_4px_0px_#000]">
+              <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center border-4 border-black bg-[#FFEB3B] shadow-[4px_4px_0px_#000]">
                 <Sparkles className="h-8 w-8 text-black" />
               </div>
-              <h2
-                className="mb-4 text-4xl font-black tracking-wide text-black uppercase"
-                style={{
-                  fontFamily:
-                    "'Big Shoulders Display', 'Impact', 'Arial Black', sans-serif"
-                }}
-              >
+              <h2 className="mb-3 text-3xl font-black tracking-tight text-black uppercase">
                 What&apos;s Your Product Idea?
               </h2>
-              <p className="text-xl leading-relaxed text-gray-700">
+              <p className="text-lg font-medium text-gray-700">
                 Tell us about your product in a few sentences, and we&apos;ll
                 help you build a comprehensive PRD.
               </p>
             </div>
 
-            <div className="space-y-6">
+            <div className="space-y-8 text-left">
+              <div className="space-y-4">
+                <label className="text-sm leading-none font-black tracking-wide text-black uppercase">
+                  Product Mode
+                </label>
+                <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+                  {(
+                    [
+                      'SaaS Product',
+                      'AI Product',
+                      'Mobile App',
+                      'Feature Enhancement'
+                    ] as const
+                  ).map((mode) => (
+                    <button
+                      key={mode}
+                      onClick={() =>
+                        setInternalPrdInput((prev) => ({
+                          ...prev,
+                          productMode: mode
+                        }))
+                      }
+                      className={`flex flex-col items-center justify-center border-2 border-black p-4 text-center text-sm font-bold tracking-wide uppercase transition-all ${
+                        prdInput.productMode === mode
+                          ? 'bg-[#FFEB3B] text-black shadow-[4px_4px_0px_#000]'
+                          : 'bg-white text-black shadow-[2px_2px_0px_#000] hover:bg-gray-50'
+                      }`}
+                    >
+                      <span>{mode}</span>
+                    </button>
+                  ))}
+                </div>
+                <p className="text-sm font-medium text-gray-600">
+                  Select the mode that best fits your product idea to get
+                  tailored results.
+                </p>
+              </div>
+
               <TextareaField
                 label="Product Idea"
                 id="productIdea"
@@ -417,12 +536,15 @@ export function PRDWizard({
                 description="Describe your product concept, target users, and key features in your own words."
               />
 
-              <div className="rounded-lg border-[3px] border-blue-200 bg-blue-50 p-4">
-                <h3 className="mb-2 flex items-center gap-2 text-lg font-bold text-blue-900">
-                  <Camera className="h-6 w-6" />
-                  Add Visual Context (Optional)
+              <div className="border-4 border-black bg-[#F5F5F5] p-6 shadow-[4px_4px_0px_#000]">
+                <h3 className="mb-2 flex items-center gap-2 font-black tracking-wide text-black uppercase">
+                  <Camera className="h-5 w-5" />
+                  Add Visual Context{' '}
+                  <span className="text-sm font-normal text-gray-600">
+                    (Optional)
+                  </span>
                 </h3>
-                <p className="mb-4 text-blue-700">
+                <p className="mb-6 text-sm font-medium text-gray-600">
                   Attach mockups, diagrams, wireframes, or reference photos to
                   help the AI better understand your product idea.
                 </p>
@@ -436,39 +558,90 @@ export function PRDWizard({
             </div>
 
             {prefillError && (
-              <div className="border-[4px] border-black bg-[#F44336] p-6 text-white shadow-[4px_4px_0px_#000]">
-                <p className="mb-2 font-bold tracking-wide uppercase">Error:</p>
-                <p className="font-medium">{prefillError}</p>
+              <div className="border-2 border-[#F44336] bg-[#FFEBEE] p-4 text-sm font-bold text-[#D32F2F]">
+                <span className="font-black">Error:</span> {prefillError}
               </div>
             )}
           </div>
         )}
 
         {currentStep === 2 && (
-          <div className="mx-auto max-w-4xl space-y-8">
+          <div className="mx-auto max-w-3xl space-y-8">
             <div className="text-center">
-              <div className="mb-6 inline-flex h-16 w-16 items-center justify-center border-[4px] border-black bg-[#2196F3] shadow-[4px_4px_0px_#000]">
-                <Edit3 className="h-8 w-8 text-white" />
+              <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center border-4 border-black bg-[#E91E63] shadow-[4px_4px_0px_#000]">
+                <MessageSquare className="h-8 w-8 text-white" />
               </div>
-              <h2
-                className="mb-4 text-4xl font-black tracking-wide text-black uppercase"
-                style={{
-                  fontFamily:
-                    "'Big Shoulders Display', 'Impact', 'Arial Black', sans-serif"
-                }}
-              >
-                Review & Customize Details
+              <h2 className="mb-3 text-3xl font-black tracking-wide text-black uppercase">
+                Let&apos;s Clarify a Few Things
               </h2>
-              <p className="text-xl leading-relaxed text-gray-700">
-                We&apos;ve pre-filled your PRD based on your idea. Review and
-                edit any section as needed.
+              <p className="text-lg font-medium text-gray-700">
+                Based on your idea, our AI strategist has identified a few areas
+                to dive deeper into.
               </p>
             </div>
 
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            <div className="space-y-6 text-left">
+              {clarificationQuestions.map((question, index) => (
+                <div
+                  key={index}
+                  className="border-2 border-black bg-white p-6 shadow-[4px_4px_0px_#000]"
+                >
+                  <label className="mb-4 block font-black tracking-wide text-black uppercase">
+                    {question}
+                  </label>
+                  <textarea
+                    value={userClarificationAnswers[index]}
+                    onChange={(e) => handleAnswerChange(index, e.target.value)}
+                    className="flex min-h-[80px] w-full border-2 border-black bg-white px-4 py-3 text-sm font-medium placeholder:text-gray-500 focus:border-[#E91E63] focus:ring-2 focus:ring-[#E91E63] focus:ring-offset-2 focus:outline-none"
+                    placeholder="Your answer (optional)..."
+                    rows={3}
+                  />
+                </div>
+              ))}
+
+              <div className="flex flex-col items-center gap-3 pt-6">
+                <Button
+                  variant="outline"
+                  onClick={() => handleNext()}
+                  className="flex items-center gap-2"
+                >
+                  <RefreshCw className="h-4 w-4" />
+                  Skip and Use Current Details
+                </Button>
+                <p className="text-sm font-medium text-gray-600">
+                  Answering these will significantly improve the quality and
+                  specificity of your PRD.
+                </p>
+              </div>
+            </div>
+
+            {prefillError && (
+              <div className="border-2 border-[#F44336] bg-[#FFEBEE] p-4 text-sm font-bold text-[#D32F2F]">
+                <span className="font-black">Error:</span> {prefillError}
+              </div>
+            )}
+          </div>
+        )}
+
+        {currentStep === 3 && (
+          <div className="mx-auto max-w-4xl space-y-8">
+            <div className="text-center">
+              <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center border-4 border-black bg-[#2196F3] shadow-[4px_4px_0px_#000]">
+                <Edit3 className="h-8 w-8 text-white" />
+              </div>
+              <h2 className="mb-3 text-3xl font-black tracking-wide text-black uppercase">
+                Review & Customize Details
+              </h2>
+              <p className="text-lg font-medium text-gray-700">
+                We&apos;ve pre-filled your PRD based on your idea and answers.
+                Review and edit any section as needed.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
               <div className="space-y-6">
                 <div>
-                  <label className="mb-2 block text-sm font-bold tracking-wide text-black uppercase">
+                  <label className="mb-2 block text-sm leading-none font-black tracking-wide text-black uppercase">
                     Product Name
                   </label>
                   <input
@@ -477,7 +650,7 @@ export function PRDWizard({
                     name="productName"
                     value={prdInput.productName}
                     onChange={handleChange}
-                    className="block w-full border-[3px] border-black bg-white px-4 py-3 font-medium text-black placeholder-gray-500 shadow-[4px_4px_0px_#000] transition-all duration-150 focus:translate-x-[-1px] focus:translate-y-[-1px] focus:border-[#2196F3] focus:shadow-[4px_4px_0px_#2196F3] focus:outline-none"
+                    className="flex h-12 w-full border-2 border-black bg-white px-4 py-2 text-sm font-medium placeholder:text-gray-500 focus:border-[#2196F3] focus:ring-2 focus:ring-[#2196F3] focus:ring-offset-2 focus:outline-none"
                     placeholder="e.g., Apollo - The AI Trip Planner"
                   />
                 </div>
@@ -504,16 +677,39 @@ export function PRDWizard({
                   rows={6}
                 />
 
-                <TextareaField
-                  label="Key Features"
-                  id="keyFeatures"
-                  name="keyFeatures"
-                  value={prdInput.keyFeatures}
-                  onChange={handleChange}
-                  placeholder="What are the main features that differentiate your product?"
-                  rows={6}
-                  description="List the key differentiating features that make your product unique and valuable."
-                />
+                {prdInput.productMode === 'Feature Enhancement' ? (
+                  <>
+                    <TextareaField
+                      label="Current State (Before)"
+                      id="currentState"
+                      name="currentState"
+                      value={prdInput.currentState}
+                      onChange={handleChange}
+                      placeholder="Describe the current implementation or feature set..."
+                      rows={4}
+                    />
+                    <TextareaField
+                      label="Proposed Changes (After)"
+                      id="proposedChanges"
+                      name="proposedChanges"
+                      value={prdInput.proposedChanges}
+                      onChange={handleChange}
+                      placeholder="Describe the specific enhancements or changes..."
+                      rows={4}
+                    />
+                  </>
+                ) : (
+                  <TextareaField
+                    label="Key Features"
+                    id="keyFeatures"
+                    name="keyFeatures"
+                    value={prdInput.keyFeatures}
+                    onChange={handleChange}
+                    placeholder="What are the main features that differentiate your product?"
+                    rows={6}
+                    description="List the key differentiating features that make your product unique and valuable."
+                  />
+                )}
               </div>
 
               <div className="md:col-span-2">
@@ -531,30 +727,23 @@ export function PRDWizard({
             </div>
 
             {generateError && (
-              <div className="border-[4px] border-black bg-[#F44336] p-6 text-white shadow-[4px_4px_0px_#000]">
-                <p className="mb-2 font-bold tracking-wide uppercase">Error:</p>
-                <p className="font-medium">{generateError}</p>
+              <div className="border-2 border-[#F44336] bg-[#FFEBEE] p-4 text-sm font-bold text-[#D32F2F]">
+                <span className="font-black">Error:</span> {generateError}
               </div>
             )}
           </div>
         )}
 
-        {currentStep === 3 && (
+        {currentStep === 4 && (
           <div className="space-y-8">
             <div className="text-center">
-              <div className="mb-6 inline-flex h-16 w-16 items-center justify-center border-[4px] border-black bg-[#4CAF50] shadow-[4px_4px_0px_#000]">
+              <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center border-4 border-black bg-[#4CAF50] shadow-[4px_4px_0px_#000]">
                 <FileText className="h-8 w-8 text-white" />
               </div>
-              <h2
-                className="mb-4 text-4xl font-black tracking-wide text-black uppercase"
-                style={{
-                  fontFamily:
-                    "'Big Shoulders Display', 'Impact', 'Arial Black', sans-serif"
-                }}
-              >
+              <h2 className="mb-3 text-3xl font-black tracking-wide text-black uppercase">
                 Your PRD is Ready!
               </h2>
-              <p className="text-xl leading-relaxed text-gray-700">
+              <p className="text-lg font-medium text-gray-700">
                 Here&apos;s your generated Product Requirements Document. You
                 can download it, copy it, or view in full page mode.
               </p>

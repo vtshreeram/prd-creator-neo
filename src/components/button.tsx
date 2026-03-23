@@ -1,82 +1,77 @@
-import { ButtonHTMLAttributes, ReactNode } from 'react';
-import { clsx } from 'clsx';
+import * as React from 'react';
+import { Slot } from '@radix-ui/react-slot';
+import { cva, type VariantProps } from 'class-variance-authority';
+import { cn } from '@/lib/utils';
+import { Loader2 } from 'lucide-react';
 
-interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+const buttonVariants = cva(
+  'inline-flex items-center justify-center whitespace-nowrap text-sm font-bold uppercase tracking-wide ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 neo-press',
+  {
+    variants: {
+      variant: {
+        default:
+          'border-2 border-black bg-black text-white shadow-[2px_2px_0px_#000] hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[4px_4px_0px_#000] active:translate-x-[2px] active:translate-y-[2px] active:shadow-[1px_1px_0px_#000]',
+        primary:
+          'border-2 border-black bg-[#FFEB3B] text-black shadow-[2px_2px_0px_#000] hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[4px_4px_0px_#000] active:translate-x-[2px] active:translate-y-[2px] active:shadow-[1px_1px_0px_#000]',
+        destructive:
+          'border-2 border-black bg-[#F44336] text-white shadow-[2px_2px_0px_#000] hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[4px_4px_0px_#000] active:translate-x-[2px] active:translate-y-[2px] active:shadow-[1px_1px_0px_#000]',
+        outline:
+          'border-2 border-black bg-white text-black shadow-[2px_2px_0px_#000] hover:bg-gray-50 hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[4px_4px_0px_#000] active:translate-x-[2px] active:translate-y-[2px] active:shadow-[1px_1px_0px_#000]',
+        secondary:
+          'border-2 border-black bg-[#2196F3] text-white shadow-[2px_2px_0px_#000] hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[4px_4px_0px_#000] active:translate-x-[2px] active:translate-y-[2px] active:shadow-[1px_1px_0px_#000]',
+        ghost:
+          'border-2 border-transparent bg-transparent text-black hover:bg-gray-100 hover:border-gray-300',
+        link: 'text-[#2196F3] underline-offset-4 hover:underline border-0 shadow-none'
+      },
+      size: {
+        default: 'h-11 px-6 py-2',
+        sm: 'h-9 px-4 py-1.5',
+        lg: 'h-12 px-8 py-3',
+        icon: 'h-11 w-11'
+      }
+    },
+    defaultVariants: {
+      variant: 'default',
+      size: 'default'
+    }
+  }
+);
+
+export interface ButtonProps
+  extends
+    React.ButtonHTMLAttributes<HTMLButtonElement>,
+    VariantProps<typeof buttonVariants> {
+  asChild?: boolean;
   isLoading?: boolean;
-  loadingLabel?: string;
-  children: ReactNode;
-  variant?: 'primary' | 'secondary' | 'danger' | 'ghost';
-  size?: 'sm' | 'md' | 'lg';
 }
 
-export function Button({
-  isLoading = false,
-  loadingLabel = 'Generating...',
-  children,
-  className = '',
-  disabled,
-  variant = 'primary',
-  size = 'md',
-  ...props
-}: ButtonProps) {
-  const baseStyles =
-    'relative inline-flex items-center justify-center font-bold uppercase tracking-wider transition-all duration-150 ease-out focus:outline-none border-black disabled:cursor-not-allowed disabled:opacity-50';
+const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  (
+    {
+      className,
+      variant,
+      size,
+      asChild = false,
+      isLoading,
+      children,
+      ...props
+    },
+    ref
+  ) => {
+    const Comp = asChild ? Slot : 'button';
+    return (
+      <Comp
+        className={cn(buttonVariants({ variant, size, className }))}
+        ref={ref}
+        disabled={isLoading || props.disabled}
+        {...props}
+      >
+        {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+        {children}
+      </Comp>
+    );
+  }
+);
+Button.displayName = 'Button';
 
-  const variantStyles = {
-    primary:
-      'bg-[#FFEB3B] text-black border-[2px] shadow-[2px_2px_0px_#000] hover:shadow-[3px_3px_0px_#000] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_#000] active:translate-x-[1px] active:translate-y-[1px] focus:border-[#2196F3] focus:shadow-[2px_2px_0px_#2196F3]',
-    secondary:
-      'bg-[#2196F3] text-white border-[2px] shadow-[2px_2px_0px_#000] hover:shadow-[3px_3px_0px_#000] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_#000] active:translate-x-[1px] active:translate-y-[1px] focus:border-[#FFEB3B] focus:shadow-[2px_2px_0px_#FFEB3B]',
-    danger:
-      'bg-[#F44336] text-white border-[2px] shadow-[2px_2px_0px_#000] hover:shadow-[3px_3px_0px_#000] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_#000] active:translate-x-[1px] active:translate-y-[1px]',
-    ghost:
-      'bg-white text-black border-[2px] shadow-[2px_2px_0px_#000] hover:shadow-[3px_3px_0px_#000] hover:translate-x-[-1px] hover:translate-y-[-1px] active:shadow-[1px_1px_0px_#000] active:translate-x-[1px] active:translate-y-[1px]'
-  };
-
-  const sizeStyles = {
-    sm: 'px-3 py-1 text-xs',
-    md: 'px-4 py-2 text-sm',
-    lg: 'px-6 py-3 text-base'
-  };
-
-  return (
-    <button
-      className={clsx(
-        baseStyles,
-        variantStyles[variant],
-        sizeStyles[size],
-        className
-      )}
-      disabled={disabled ?? isLoading}
-      {...props}
-    >
-      {isLoading ? (
-        <span className="flex items-center gap-2">
-          <svg
-            className="h-5 w-5 animate-spin"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-          >
-            <circle
-              className="opacity-25"
-              cx="12"
-              cy="12"
-              r="10"
-              stroke="currentColor"
-              strokeWidth="4"
-            />
-            <path
-              className="opacity-75"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-            />
-          </svg>
-          {loadingLabel}
-        </span>
-      ) : (
-        children
-      )}
-    </button>
-  );
-}
+export { Button, buttonVariants };

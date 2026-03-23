@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { GEMINI_MODELS } from '@/lib/models';
-import { Settings, Check } from 'lucide-react';
+import { Settings, Check, X, Info } from 'lucide-react';
+import { Button } from './button';
 
 interface Model {
   value: string;
@@ -110,52 +111,33 @@ export function SettingsModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
-      <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto border-[5px] border-black bg-white shadow-[12px_12px_0px_#000]">
-        <div className="p-8">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+      <div className="max-h-[90vh] w-full max-w-xl overflow-y-auto border-2 border-black bg-white shadow-[6px_6px_0px_#000]">
+        <div className="p-6 sm:p-8">
           {/* Header */}
-          <div className="mb-8 flex items-center justify-between border-b-[3px] border-black pb-4">
-            <h2
-              className="text-3xl font-black tracking-tight text-black uppercase"
-              style={{
-                fontFamily:
-                  "'Big Shoulders Display', 'Impact', 'Arial Black', sans-serif"
-              }}
-            >
-              <span className="flex items-center gap-2">
-                <Settings className="h-6 w-6" />
-                SETTINGS
-              </span>
+          <div className="mb-6 flex items-center justify-between border-b-2 border-black pb-4">
+            <h2 className="flex items-center gap-2 text-xl font-black text-black">
+              <Settings className="h-5 w-5" />
+              Settings
             </h2>
-            <button
+            <Button
+              variant="outline"
+              size="icon"
               onClick={onClose}
-              className="border-[3px] border-black p-2 text-black transition-all duration-150 hover:bg-[#F44336] hover:text-white"
-              aria-label="Close"
+              className="h-8 w-8"
             >
-              <svg
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={3}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
+              <X className="h-5 w-5" />
+            </Button>
           </div>
 
           {/* API Key Section */}
           <div className="mb-8 space-y-6">
-            <div>
+            <div className="space-y-2">
               <label
                 htmlFor="apiKey"
-                className="mb-3 block text-sm font-bold tracking-wide text-black uppercase"
+                className="block text-sm font-bold tracking-wide uppercase"
               >
-                Gemini API Key <span className="text-[#E91E63]">*</span>
+                Gemini API Key <span className="text-[#F44336]">*</span>
               </label>
               <div className="relative">
                 <input
@@ -164,23 +146,23 @@ export function SettingsModal({
                   value={apiKey}
                   onChange={handleApiKeyChange}
                   placeholder="Enter your Gemini API key"
-                  className="w-full border-[3px] border-black bg-white px-4 py-3 pr-24 font-medium text-black placeholder-gray-500 shadow-[4px_4px_0px_#000] focus:border-[#2196F3] focus:shadow-[4px_4px_0px_#2196F3] focus:outline-none"
+                  className="flex h-12 w-full border-2 border-black bg-white px-4 py-2 text-sm font-medium placeholder:text-gray-500 focus:border-[#2196F3] focus:ring-2 focus:ring-[#2196F3] focus:ring-offset-2 focus:outline-none"
                 />
                 <button
                   type="button"
                   onClick={() => setShowApiKey(!showApiKey)}
-                  className="absolute top-1/2 right-2 -translate-y-1/2 border-[2px] border-black bg-[#FFEB3B] px-3 py-1 text-xs font-bold uppercase transition-colors hover:bg-[#FDD835]"
+                  className="absolute top-1/2 right-3 -translate-y-1/2 border-2 border-black bg-[#FFEB3B] px-2 py-1 text-xs font-bold shadow-[2px_2px_0px_#000] hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[3px_3px_0px_#000] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_#000]"
                 >
                   {showApiKey ? 'Hide' : 'Show'}
                 </button>
               </div>
-              <p className="mt-3 text-sm font-medium text-gray-700">
+              <p className="text-sm font-medium text-black">
                 Get your API key from{' '}
                 <a
                   href="https://aistudio.google.com/apikey"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="font-bold text-[#2196F3] underline hover:text-[#1976D2]"
+                  className="font-bold text-[#2196F3] underline underline-offset-2 hover:text-[#1976D2]"
                 >
                   Google AI Studio
                 </a>
@@ -188,18 +170,18 @@ export function SettingsModal({
             </div>
 
             {/* Model Selection */}
-            <div>
-              <div className="mb-3 flex items-center justify-between">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
                 <label
                   htmlFor="model"
-                  className="block text-sm font-bold tracking-wide text-black uppercase"
+                  className="block text-sm font-bold tracking-wide uppercase"
                 >
                   Model Selection
                 </label>
                 {loadingModels && (
-                  <span className="flex items-center text-xs font-bold text-[#2196F3] uppercase">
+                  <span className="flex items-center text-xs font-bold text-[#2196F3]">
                     <svg
-                      className="mr-2 h-4 w-4 animate-spin"
+                      className="mr-1.5 h-3.5 w-3.5 animate-spin"
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
                       viewBox="0 0 24 24"
@@ -218,21 +200,19 @@ export function SettingsModal({
                         d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                       ></path>
                     </svg>
-                    Fetching...
+                    Fetching models...
                   </span>
                 )}
                 {!loadingModels && models.length > GEMINI_MODELS.length && (
-                  <span className="text-xs font-bold text-[#4CAF50] uppercase">
-                    <span className="flex items-center gap-1">
-                      <Check className="h-3 w-3" />
-                      {models.length} LOADED
-                    </span>
+                  <span className="flex items-center gap-1 text-xs font-bold text-[#4CAF50]">
+                    <Check className="h-3 w-3" />
+                    {models.length} loaded
                   </span>
                 )}
               </div>
 
               {modelsError && (
-                <div className="mb-3 border-[3px] border-black bg-[#FF9800] px-4 py-2 text-sm font-bold text-black">
+                <div className="border-2 border-[#FF9800] bg-[#FFF3E0] p-3 text-sm font-medium text-[#E65100]">
                   {modelsError}
                 </div>
               )}
@@ -242,7 +222,7 @@ export function SettingsModal({
                 value={model}
                 onChange={(e) => setModel(e.target.value)}
                 disabled={loadingModels}
-                className="w-full border-[3px] border-black bg-white px-4 py-3 font-medium text-black shadow-[4px_4px_0px_#000] focus:border-[#2196F3] focus:shadow-[4px_4px_0px_#2196F3] focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex h-12 w-full border-2 border-black bg-white px-4 py-2 text-sm font-medium focus:border-[#2196F3] focus:ring-2 focus:ring-[#2196F3] focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:bg-gray-100"
               >
                 {models.map((modelOption) => (
                   <option key={modelOption.value} value={modelOption.value}>
@@ -250,45 +230,31 @@ export function SettingsModal({
                   </option>
                 ))}
               </select>
-              <div className="mt-3 space-y-2">
-                <p className="text-sm font-medium text-gray-700">
+              <div className="mt-2 space-y-1">
+                <p className="text-sm font-medium text-black">
                   {models.find((m) => m.value === model)?.description}
                 </p>
                 {models.find((m) => m.value === model)?.inputTokenLimit && (
-                  <p className="text-xs font-medium text-gray-600">
-                    Input limit:{' '}
+                  <p className="text-xs font-bold text-gray-600">
+                    Context Window:{' '}
                     {models
                       .find((m) => m.value === model)
                       ?.inputTokenLimit?.toLocaleString()}{' '}
                     tokens
-                    {models.find((m) => m.value === model)?.outputTokenLimit &&
-                      ` • Output limit: ${models.find((m) => m.value === model)?.outputTokenLimit?.toLocaleString()} tokens`}
                   </p>
                 )}
               </div>
             </div>
 
             {/* Token Info */}
-            <div className="border-[3px] border-black bg-[#2196F3] p-6 shadow-[4px_4px_0px_#000]">
+            <div className="border-2 border-[#2196F3] bg-[#E3F2FD] p-4">
               <div className="flex items-start">
-                <svg
-                  className="mt-0.5 mr-4 h-6 w-6 flex-shrink-0 text-white"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={3}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
+                <Info className="mt-0.5 mr-3 h-5 w-5 flex-shrink-0 text-[#1976D2]" />
                 <div>
-                  <h4 className="mb-2 text-base font-black text-white uppercase">
+                  <h4 className="text-sm font-black text-black">
                     Unlimited Token Generation
                   </h4>
-                  <p className="text-sm font-medium text-white">
+                  <p className="mt-1 text-sm font-medium text-black">
                     Token limits are removed for maximum flexibility. The API
                     will generate as much content as needed for comprehensive
                     PRDs.
@@ -299,20 +265,21 @@ export function SettingsModal({
           </div>
 
           {/* Action Buttons */}
-          <div className="flex gap-4 border-t-[3px] border-black pt-6">
-            <button
-              onClick={handleSave}
-              disabled={!apiKey.trim()}
-              className="flex-1 border-[3px] border-black bg-[#FFEB3B] px-6 py-3 font-bold tracking-wide text-black uppercase shadow-[4px_4px_0px_#000] transition-all duration-150 hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_#000] active:translate-x-[2px] active:translate-y-[2px] active:shadow-[2px_2px_0px_#000] disabled:transform-none disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-[4px_4px_0px_#000]"
-            >
-              Save Settings
-            </button>
-            <button
+          <div className="flex flex-col-reverse gap-3 border-t-2 border-black pt-6 sm:flex-row sm:justify-end">
+            <Button
+              variant="outline"
               onClick={onClose}
-              className="border-[3px] border-black bg-white px-6 py-3 font-bold tracking-wide text-black uppercase shadow-[4px_4px_0px_#000] transition-all duration-150 hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_#000] active:translate-x-[2px] active:translate-y-[2px] active:shadow-[2px_2px_0px_#000]"
+              className="w-full sm:w-auto"
             >
               Cancel
-            </button>
+            </Button>
+            <Button
+              onClick={handleSave}
+              disabled={!apiKey.trim()}
+              className="w-full sm:w-auto"
+            >
+              Save Settings
+            </Button>
           </div>
         </div>
       </div>
