@@ -81,29 +81,29 @@ export function PWAInstallPrompt() {
 
   return (
     <div className="animate-slide-up fixed right-4 bottom-4 left-4 z-50 md:right-4 md:left-auto md:max-w-md">
-      <div className="border-2 border-black bg-[#2196F3] p-4 shadow-[4px_4px_0px_#000]">
+      <div className="rounded-xl border border-[#e5e7eb] bg-white p-4 shadow-lg">
         <div className="flex items-start gap-3">
-          <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center border-2 border-black bg-[#FFEB3B] shadow-[2px_2px_0px_#000]">
-            <Smartphone className="h-8 w-8 text-black" />
+          <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-[#6366f1]/10">
+            <Smartphone className="h-6 w-6 text-[#6366f1]" />
           </div>
           <div className="min-w-0 flex-1">
-            <h3 className="mb-1 text-sm font-black text-black">
+            <h3 className="mb-1 text-sm font-semibold text-[#111827]">
               Install AI PRD Creator
             </h3>
-            <p className="mb-3 text-xs font-medium text-black">
+            <p className="mb-3 text-xs text-[#6b7280]">
               Install this app on your device for quick access and offline
               support
             </p>
             <div className="flex gap-2">
               <button
                 onClick={handleInstallClick}
-                className="border-2 border-black bg-[#FFEB3B] px-4 py-2 text-sm font-bold text-black shadow-[2px_2px_0px_#000] transition-all hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[3px_3px_0px_#000] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_#000]"
+                className="rounded-lg bg-[#6366f1] px-4 py-2 text-xs font-medium text-white transition-colors hover:bg-[#4f46e5]"
               >
                 Install App
               </button>
               <button
                 onClick={handleDismiss}
-                className="border-2 border-black bg-white px-4 py-2 text-sm font-bold text-black shadow-[2px_2px_0px_#000] transition-all hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[3px_3px_0px_#000] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_#000]"
+                className="rounded-lg bg-[#f3f4f6] px-4 py-2 text-xs font-medium text-[#374151] transition-colors hover:bg-[#e5e7eb]"
               >
                 Maybe Later
               </button>
@@ -111,7 +111,7 @@ export function PWAInstallPrompt() {
           </div>
           <button
             onClick={handleDismiss}
-            className="flex-shrink-0 border-2 border-black bg-white p-1 shadow-[2px_2px_0px_#000] transition-all hover:bg-gray-100"
+            className="flex-shrink-0 rounded-lg p-1 text-[#9ca3af] transition-colors hover:bg-[#f3f4f6] hover:text-[#6b7280]"
             aria-label="Close"
           >
             <svg

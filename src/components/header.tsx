@@ -10,17 +10,17 @@ interface HeaderProps {
 
 export function Header({ onSettingsClick, onSavedDraftsClick }: HeaderProps) {
   return (
-    <header className="sticky top-0 z-50 border-b-4 border-black bg-white shadow-[0_4px_0px_#000]">
-      <div className="container mx-auto px-4 py-3">
+    <header className="sticky top-0 z-50 border-b border-[#e5e7eb] bg-white/80 backdrop-blur-md">
+      <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="flex items-center justify-center border-2 border-black bg-[#FFEB3B] p-2 shadow-[2px_2px_0px_#000]">
-              <FileText className="h-5 w-5 text-black" />
+            <div className="flex items-center justify-center rounded-lg bg-[#6366f1] p-2">
+              <FileText className="h-5 w-5 text-white" />
             </div>
-            <h1 className="text-xl font-black tracking-tight text-black md:text-2xl">
+            <h1 className="text-xl font-semibold tracking-tight text-[#111827] md:text-2xl">
               PRD Creator
             </h1>
-            <span className="ml-2 hidden rounded-none border-2 border-black bg-[#E91E63] px-2.5 py-0.5 text-xs font-bold text-white shadow-[2px_2px_0px_#000] md:inline-block">
+            <span className="ml-2 rounded-full bg-[#f3f4f6] px-2.5 py-0.5 text-xs font-medium text-[#6b7280]">
               Beta
             </span>
           </div>
@@ -29,7 +29,7 @@ export function Header({ onSettingsClick, onSavedDraftsClick }: HeaderProps) {
           <div className="flex items-center gap-2">
             {onSavedDraftsClick && (
               <Button
-                variant="secondary"
+                variant="ghost"
                 size="sm"
                 onClick={onSavedDraftsClick}
                 className="hidden sm:flex"
@@ -40,7 +40,7 @@ export function Header({ onSettingsClick, onSavedDraftsClick }: HeaderProps) {
             )}
             {onSavedDraftsClick && (
               <Button
-                variant="secondary"
+                variant="ghost"
                 size="icon"
                 onClick={onSavedDraftsClick}
                 className="sm:hidden"
@@ -51,7 +51,7 @@ export function Header({ onSettingsClick, onSavedDraftsClick }: HeaderProps) {
             )}
 
             <Button
-              variant="outline"
+              variant="ghost"
               size="icon"
               onClick={onSettingsClick}
               aria-label="Settings"

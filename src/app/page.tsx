@@ -111,12 +111,12 @@ export default function Home() {
         <div className="mx-auto flex h-full min-h-0 max-w-7xl flex-col">
           {/* Setup Prompt Banner */}
           {showSetupPrompt && (
-            <div className="mb-6 border-4 border-black bg-[#FFEB3B] p-6 shadow-[4px_4px_0px_#000]">
+            <div className="mb-6 rounded-xl border border-[#e5e7eb] bg-white p-6 shadow-sm">
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div className="flex items-center">
-                  <div className="mr-4 flex h-12 w-12 flex-shrink-0 items-center justify-center border-2 border-black bg-white shadow-[2px_2px_0px_#000]">
+                  <div className="mr-4 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[#6366f1]/10">
                     <svg
-                      className="h-8 w-8 text-[#2196F3]"
+                      className="h-5 w-5 text-[#6366f1]"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -130,17 +130,17 @@ export default function Home() {
                     </svg>
                   </div>
                   <div>
-                    <h3 className="mb-1 text-lg font-black tracking-wide text-black uppercase">
+                    <h3 className="mb-0.5 text-sm font-semibold text-[#111827]">
                       Setup Required
                     </h3>
-                    <p className="font-bold text-black">
+                    <p className="text-sm text-[#6b7280]">
                       Add your Gemini API key to start generating PRDs
                     </p>
                   </div>
                 </div>
                 <button
                   onClick={() => setIsSettingsOpen(true)}
-                  className="border-2 border-black bg-[#2196F3] px-6 py-3 font-bold text-white shadow-[4px_4px_0px_#000] transition-all hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_#000] focus:ring-2 focus:ring-[#2196F3] focus:ring-offset-2 focus:outline-none active:translate-x-[2px] active:translate-y-[2px] active:shadow-[2px_2px_0px_#000]"
+                  className="rounded-lg bg-[#6366f1] px-5 py-2.5 text-sm font-medium text-white transition-all hover:bg-[#4f46e5]"
                 >
                   Configure API Key
                 </button>

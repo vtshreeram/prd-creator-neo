@@ -111,17 +111,17 @@ export function SettingsModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-      <div className="max-h-[90vh] w-full max-w-xl overflow-y-auto border-2 border-black bg-white shadow-[6px_6px_0px_#000]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+      <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl border border-[#e5e7eb] bg-white shadow-xl">
         <div className="p-6 sm:p-8">
           {/* Header */}
-          <div className="mb-6 flex items-center justify-between border-b-2 border-black pb-4">
-            <h2 className="flex items-center gap-2 text-xl font-black text-black">
-              <Settings className="h-5 w-5" />
+          <div className="mb-6 flex items-center justify-between">
+            <h2 className="flex items-center gap-2 text-lg font-semibold text-[#111827]">
+              <Settings className="h-5 w-5 text-[#6b7280]" />
               Settings
             </h2>
             <Button
-              variant="outline"
+              variant="ghost"
               size="icon"
               onClick={onClose}
               className="h-8 w-8"
@@ -135,9 +135,9 @@ export function SettingsModal({
             <div className="space-y-2">
               <label
                 htmlFor="apiKey"
-                className="block text-sm font-bold tracking-wide uppercase"
+                className="block text-sm font-medium text-[#374151]"
               >
-                Gemini API Key <span className="text-[#F44336]">*</span>
+                Gemini API Key <span className="text-[#dc2626]">*</span>
               </label>
               <div className="relative">
                 <input
@@ -146,23 +146,23 @@ export function SettingsModal({
                   value={apiKey}
                   onChange={handleApiKeyChange}
                   placeholder="Enter your Gemini API key"
-                  className="flex h-12 w-full border-2 border-black bg-white px-4 py-2 text-sm font-medium placeholder:text-gray-500 focus:border-[#2196F3] focus:ring-2 focus:ring-[#2196F3] focus:ring-offset-2 focus:outline-none"
+                  className="flex h-11 w-full rounded-lg border border-[#e5e7eb] bg-white px-4 py-2.5 text-sm text-[#374151] placeholder:text-[#9ca3af] focus:border-[#6366f1] focus:ring-2 focus:ring-[#6366f1]/20 focus:outline-none"
                 />
                 <button
                   type="button"
                   onClick={() => setShowApiKey(!showApiKey)}
-                  className="absolute top-1/2 right-3 -translate-y-1/2 border-2 border-black bg-[#FFEB3B] px-2 py-1 text-xs font-bold shadow-[2px_2px_0px_#000] hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[3px_3px_0px_#000] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_#000]"
+                  className="absolute top-1/2 right-3 -translate-y-1/2 rounded-md bg-[#f3f4f6] px-2.5 py-1 text-xs font-medium text-[#374151] transition-colors hover:bg-[#e5e7eb]"
                 >
                   {showApiKey ? 'Hide' : 'Show'}
                 </button>
               </div>
-              <p className="text-sm font-medium text-black">
+              <p className="text-sm text-[#6b7280]">
                 Get your API key from{' '}
                 <a
                   href="https://aistudio.google.com/apikey"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="font-bold text-[#2196F3] underline underline-offset-2 hover:text-[#1976D2]"
+                  className="font-medium text-[#6366f1] hover:underline"
                 >
                   Google AI Studio
                 </a>
@@ -174,12 +174,12 @@ export function SettingsModal({
               <div className="flex items-center justify-between">
                 <label
                   htmlFor="model"
-                  className="block text-sm font-bold tracking-wide uppercase"
+                  className="block text-sm font-medium text-[#374151]"
                 >
                   Model Selection
                 </label>
                 {loadingModels && (
-                  <span className="flex items-center text-xs font-bold text-[#2196F3]">
+                  <span className="flex items-center text-xs font-medium text-[#6366f1]">
                     <svg
                       className="mr-1.5 h-3.5 w-3.5 animate-spin"
                       xmlns="http://www.w3.org/2000/svg"
@@ -204,7 +204,7 @@ export function SettingsModal({
                   </span>
                 )}
                 {!loadingModels && models.length > GEMINI_MODELS.length && (
-                  <span className="flex items-center gap-1 text-xs font-bold text-[#4CAF50]">
+                  <span className="flex items-center gap-1 text-xs font-medium text-[#10b981]">
                     <Check className="h-3 w-3" />
                     {models.length} loaded
                   </span>
@@ -212,7 +212,7 @@ export function SettingsModal({
               </div>
 
               {modelsError && (
-                <div className="border-2 border-[#FF9800] bg-[#FFF3E0] p-3 text-sm font-medium text-[#E65100]">
+                <div className="rounded-lg bg-[#fef3c7] p-3 text-sm text-[#92400e]">
                   {modelsError}
                 </div>
               )}
@@ -222,7 +222,7 @@ export function SettingsModal({
                 value={model}
                 onChange={(e) => setModel(e.target.value)}
                 disabled={loadingModels}
-                className="flex h-12 w-full border-2 border-black bg-white px-4 py-2 text-sm font-medium focus:border-[#2196F3] focus:ring-2 focus:ring-[#2196F3] focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:bg-gray-100"
+                className="flex h-11 w-full rounded-lg border border-[#e5e7eb] bg-white px-4 py-2.5 text-sm text-[#374151] focus:border-[#6366f1] focus:ring-2 focus:ring-[#6366f1]/20 focus:outline-none disabled:cursor-not-allowed disabled:bg-[#f9fafb]"
               >
                 {models.map((modelOption) => (
                   <option key={modelOption.value} value={modelOption.value}>
@@ -231,11 +231,11 @@ export function SettingsModal({
                 ))}
               </select>
               <div className="mt-2 space-y-1">
-                <p className="text-sm font-medium text-black">
+                <p className="text-sm text-[#6b7280]">
                   {models.find((m) => m.value === model)?.description}
                 </p>
                 {models.find((m) => m.value === model)?.inputTokenLimit && (
-                  <p className="text-xs font-bold text-gray-600">
+                  <p className="text-xs text-[#9ca3af]">
                     Context Window:{' '}
                     {models
                       .find((m) => m.value === model)
@@ -247,14 +247,14 @@ export function SettingsModal({
             </div>
 
             {/* Token Info */}
-            <div className="border-2 border-[#2196F3] bg-[#E3F2FD] p-4">
+            <div className="rounded-lg bg-[#f9fafb] p-4">
               <div className="flex items-start">
-                <Info className="mt-0.5 mr-3 h-5 w-5 flex-shrink-0 text-[#1976D2]" />
+                <Info className="mt-0.5 mr-3 h-5 w-5 flex-shrink-0 text-[#6b7280]" />
                 <div>
-                  <h4 className="text-sm font-black text-black">
+                  <h4 className="text-sm font-medium text-[#374151]">
                     Unlimited Token Generation
                   </h4>
-                  <p className="mt-1 text-sm font-medium text-black">
+                  <p className="mt-1 text-sm text-[#6b7280]">
                     Token limits are removed for maximum flexibility. The API
                     will generate as much content as needed for comprehensive
                     PRDs.
@@ -265,7 +265,7 @@ export function SettingsModal({
           </div>
 
           {/* Action Buttons */}
-          <div className="flex flex-col-reverse gap-3 border-t-2 border-black pt-6 sm:flex-row sm:justify-end">
+          <div className="flex flex-col-reverse gap-3 border-t border-[#e5e7eb] pt-6 sm:flex-row sm:justify-end">
             <Button
               variant="outline"
               onClick={onClose}

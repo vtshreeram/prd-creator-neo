@@ -43,7 +43,6 @@ export function PRDWizard({
   prdInput: externalPrdInput,
   onResetState
 }: PRDWizardProps) {
-  // Use external state if provided (when loading from saved drafts), otherwise use internal state
   const [internalCurrentStep, setInternalCurrentStep] = useState<1 | 2 | 3 | 4>(
     1
   );
@@ -108,14 +107,13 @@ export function PRDWizard({
     setIsClarifying(true);
     setPrefillError('');
 
-    // Convert images to base64 for API transmission
     const imageData = await Promise.all(
       productIdeaImages.map(async (img) => ({
         id: img.id,
         name: img.name,
         type: img.type,
         size: img.size,
-        data: img.preview // This is already base64 from the FileReader
+        data: img.preview
       }))
     );
 
@@ -158,18 +156,16 @@ export function PRDWizard({
     setIsPrefilling(true);
     setPrefillError('');
 
-    // Convert images to base64 for API transmission
     const imageData = await Promise.all(
       productIdeaImages.map(async (img) => ({
         id: img.id,
         name: img.name,
         type: img.type,
         size: img.size,
-        data: img.preview // This is already base64 from the FileReader
+        data: img.preview
       }))
     );
 
-    // Combine idea with clarification context
     const enrichedIdea = `
 Initial Idea: ${productIdea}
 
@@ -223,7 +219,6 @@ ${clarificationQuestions
     setIsGenerating(true);
     setGenerateError('');
 
-    // Include images in the generation request
     const inputsWithImages = {
       ...prdInput,
       productIdeaImages: productIdeaImages
@@ -299,20 +294,17 @@ ${clarificationQuestions
   };
 
   const handleFinish = () => {
-    // Reset to step 1 to start a new idea
     setCurrentStep(1);
     setProductIdea('');
     setProductIdeaImages([]);
     setClarificationQuestions([]);
     setUserClarificationAnswers([]);
     if (externalPrdInput) {
-      // If using external state, notify parent to reset
       onResetState?.();
     } else {
       setInternalPrdInput(DEFAULT_PRD_INPUT);
     }
     if (externalGeneratedPrd) {
-      // If using external state, notify parent to reset
       onResetState?.();
     } else {
       setInternalGeneratedPrd('');
@@ -324,7 +316,6 @@ ${clarificationQuestions
   const handleStepClick = (stepId: number) => {
     if (stepId === 1) {
       setCurrentStep(1);
-      // Reset to fresh state when going back to step 1 from a loaded draft
       if (externalPrdInput && currentStep === 4) {
         onResetState?.();
       }
@@ -345,20 +336,17 @@ ${clarificationQuestions
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col bg-white">
-      {/* Progress Steps */}
-      <div className="mb-8 p-4">
+      <div className="mb-10 p-4">
         <div className="relative">
-          {/* Background Progress Line */}
-          <div className="absolute top-8 right-0 left-0 h-2 border-2 border-black bg-gray-200">
+          <div className="absolute top-6 right-0 left-0 h-1 bg-[#e5e7eb]">
             <div
-              className="h-full border-r-2 border-black bg-[#FFEB3B] transition-all duration-500"
+              className="h-full bg-[#6366f1] transition-all duration-500"
               style={{
                 width: `${((currentStep - 1) / (steps.length - 1)) * 100}%`
               }}
             />
           </div>
 
-          {/* Step Indicators */}
           <div className="relative flex items-center justify-between">
             {steps.map((step) => {
               const Icon = step.icon;
@@ -375,45 +363,29 @@ ${clarificationQuestions
                   <button
                     onClick={() => isClickable && handleStepClick(step.id)}
                     disabled={!isClickable}
-                    className={`relative z-10 flex h-16 w-16 transform items-center justify-center border-4 transition-all duration-300 ${
+                    className={`relative z-10 flex h-12 w-12 transform items-center justify-center rounded-full transition-all duration-300 ${
                       isActive
-                        ? 'border-black bg-[#FFEB3B] shadow-[4px_4px_0px_#000]'
+                        ? 'bg-[#6366f1] text-white shadow-lg ring-4 ring-[#6366f1]/20'
                         : isCompleted
-                          ? 'border-black bg-[#4CAF50] text-white shadow-[4px_4px_0px_#000]'
+                          ? 'bg-[#10b981] text-white'
                           : isClickable
-                            ? 'border-black bg-white hover:bg-gray-50 hover:shadow-[2px_2px_0px_#000]'
-                            : 'cursor-not-allowed border-gray-300 bg-gray-100'
+                            ? 'border border-[#e5e7eb] bg-white text-[#6b7280] hover:border-[#6366f1]/50 hover:text-[#6366f1]'
+                            : 'cursor-not-allowed bg-[#f9fafb] text-[#d1d5db]'
                     } `}
                   >
-                    <span
-                      className={`absolute -top-6 text-xs font-black ${isActive ? 'text-black' : isCompleted ? 'text-black' : 'text-gray-400'}`}
-                    >
-                      {String(step.id).padStart(2, '0')}
-                    </span>
-                    <Icon
-                      className={`h-6 w-6 ${
-                        isActive
-                          ? 'text-black'
-                          : isCompleted
-                            ? 'text-white'
-                            : 'text-gray-400'
-                      }`}
-                    />
+                    <Icon className="h-5 w-5" />
                   </button>
-                  <div className="mt-6 text-center">
+                  <div className="mt-3 text-center">
                     <p
-                      className={`text-sm font-black tracking-wide uppercase ${
+                      className={`text-xs font-medium ${
                         isActive
-                          ? 'text-black'
+                          ? 'text-[#6366f1]'
                           : isCompleted
-                            ? 'text-[#4CAF50]'
-                            : 'text-gray-400'
+                            ? 'text-[#10b981]'
+                            : 'text-[#9ca3af]'
                       }`}
                     >
                       {step.title}
-                    </p>
-                    <p className="mt-1 text-xs font-medium text-gray-500 sm:block">
-                      {step.description}
                     </p>
                   </div>
                 </div>
@@ -423,35 +395,28 @@ ${clarificationQuestions
         </div>
       </div>
 
-      {/* Model Info */}
       <div className="mb-6 flex justify-center">
-        <div className="inline-flex items-center border-2 border-black bg-[#FFEB3B] px-4 py-1.5 text-sm font-bold shadow-[2px_2px_0px_#000]">
-          <div className="flex items-center space-x-2">
-            <div className="h-2 w-2 animate-pulse rounded-full bg-black"></div>
-            <span className="text-black">Model:</span>
-            <span className="text-black">
-              {modelDisplayName || selectedModel}
-            </span>
-          </div>
+        <div className="inline-flex items-center rounded-full bg-[#f3f4f6] px-4 py-1.5 text-xs font-medium text-[#6b7280]">
+          <span className="mr-2 h-1.5 w-1.5 rounded-full bg-[#10b981]"></span>
+          {modelDisplayName || selectedModel}
         </div>
       </div>
 
-      {/* Sticky Navigation Bar */}
-      <div className="sticky top-0 z-40 mb-6 border-4 border-black bg-white p-4 shadow-[4px_4px_0px_#000]">
+      <div className="sticky top-0 z-40 mb-6 rounded-xl border border-[#e5e7eb] bg-white/90 px-4 py-3 backdrop-blur-md">
         <div className="flex items-center justify-between">
           <Button
-            variant="outline"
+            variant="ghost"
             onClick={handlePrevious}
             disabled={currentStep === 1}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 text-[#6b7280]"
           >
             <ArrowLeft className="h-4 w-4" />
             Previous
           </Button>
 
-          <div className="flex items-center gap-2 text-sm font-black tracking-wide uppercase">
-            <span className="text-lg text-black">Step {currentStep}</span>
-            <span className="text-gray-400">/ {steps.length}</span>
+          <div className="flex items-center gap-1 text-sm font-medium text-[#374151]">
+            <span className="text-[#6366f1]">Step {currentStep}</span>
+            <span className="text-[#d1d5db]">of {steps.length}</span>
           </div>
 
           <Button
@@ -470,18 +435,17 @@ ${clarificationQuestions
         </div>
       </div>
 
-      {/* Step Content */}
-      <div className="min-h-[500px] border-4 border-black bg-white p-6 shadow-[6px_6px_0px_#000] sm:p-10">
+      <div className="min-h-[500px] rounded-xl border border-[#e5e7eb] bg-white p-6 shadow-sm sm:p-10">
         {currentStep === 1 && (
           <div className="mx-auto max-w-3xl space-y-8">
             <div className="text-center">
-              <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center border-4 border-black bg-[#FFEB3B] shadow-[4px_4px_0px_#000]">
-                <Sparkles className="h-8 w-8 text-black" />
+              <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-xl bg-[#6366f1]/10">
+                <Sparkles className="h-7 w-7 text-[#6366f1]" />
               </div>
-              <h2 className="mb-3 text-3xl font-black tracking-tight text-black uppercase">
+              <h2 className="mb-3 text-2xl font-semibold tracking-tight text-[#111827]">
                 What&apos;s Your Product Idea?
               </h2>
-              <p className="text-lg font-medium text-gray-700">
+              <p className="text-[#6b7280]">
                 Tell us about your product in a few sentences, and we&apos;ll
                 help you build a comprehensive PRD.
               </p>
@@ -489,10 +453,10 @@ ${clarificationQuestions
 
             <div className="space-y-8 text-left">
               <div className="space-y-4">
-                <label className="text-sm leading-none font-black tracking-wide text-black uppercase">
+                <label className="text-sm font-medium text-[#374151]">
                   Product Mode
                 </label>
-                <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                   {(
                     [
                       'SaaS Product',
@@ -509,17 +473,17 @@ ${clarificationQuestions
                           productMode: mode
                         }))
                       }
-                      className={`flex flex-col items-center justify-center border-2 border-black p-4 text-center text-sm font-bold tracking-wide uppercase transition-all ${
+                      className={`flex flex-col items-center justify-center rounded-lg border p-3 text-center text-xs font-medium transition-all ${
                         prdInput.productMode === mode
-                          ? 'bg-[#FFEB3B] text-black shadow-[4px_4px_0px_#000]'
-                          : 'bg-white text-black shadow-[2px_2px_0px_#000] hover:bg-gray-50'
+                          ? 'border-[#6366f1] bg-[#6366f1]/5 text-[#6366f1]'
+                          : 'border-[#e5e7eb] bg-white text-[#6b7280] hover:border-[#d1d5db]'
                       }`}
                     >
                       <span>{mode}</span>
                     </button>
                   ))}
                 </div>
-                <p className="text-sm font-medium text-gray-600">
+                <p className="text-xs text-[#9ca3af]">
                   Select the mode that best fits your product idea to get
                   tailored results.
                 </p>
@@ -536,15 +500,15 @@ ${clarificationQuestions
                 description="Describe your product concept, target users, and key features in your own words."
               />
 
-              <div className="border-4 border-black bg-[#F5F5F5] p-6 shadow-[4px_4px_0px_#000]">
-                <h3 className="mb-2 flex items-center gap-2 font-black tracking-wide text-black uppercase">
-                  <Camera className="h-5 w-5" />
+              <div className="rounded-xl border border-[#e5e7eb] bg-[#f9fafb] p-6">
+                <h3 className="mb-2 flex items-center gap-2 text-sm font-medium text-[#374151]">
+                  <Camera className="h-4 w-4 text-[#6b7280]" />
                   Add Visual Context{' '}
-                  <span className="text-sm font-normal text-gray-600">
+                  <span className="text-xs font-normal text-[#9ca3af]">
                     (Optional)
                   </span>
                 </h3>
-                <p className="mb-6 text-sm font-medium text-gray-600">
+                <p className="mb-4 text-xs text-[#9ca3af]">
                   Attach mockups, diagrams, wireframes, or reference photos to
                   help the AI better understand your product idea.
                 </p>
@@ -552,14 +516,14 @@ ${clarificationQuestions
                   images={productIdeaImages}
                   onImagesChange={setProductIdeaImages}
                   maxImages={5}
-                  maxFileSize={10 * 1024 * 1024} // 10MB
+                  maxFileSize={10 * 1024 * 1024}
                 />
               </div>
             </div>
 
             {prefillError && (
-              <div className="border-2 border-[#F44336] bg-[#FFEBEE] p-4 text-sm font-bold text-[#D32F2F]">
-                <span className="font-black">Error:</span> {prefillError}
+              <div className="rounded-lg bg-[#fef2f2] p-4 text-sm text-[#dc2626]">
+                <span className="font-medium">Error:</span> {prefillError}
               </div>
             )}
           </div>
@@ -568,13 +532,13 @@ ${clarificationQuestions
         {currentStep === 2 && (
           <div className="mx-auto max-w-3xl space-y-8">
             <div className="text-center">
-              <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center border-4 border-black bg-[#E91E63] shadow-[4px_4px_0px_#000]">
-                <MessageSquare className="h-8 w-8 text-white" />
+              <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-xl bg-[#8b5cf6]/10">
+                <MessageSquare className="h-7 w-7 text-[#8b5cf6]" />
               </div>
-              <h2 className="mb-3 text-3xl font-black tracking-wide text-black uppercase">
+              <h2 className="mb-3 text-2xl font-semibold tracking-tight text-[#111827]">
                 Let&apos;s Clarify a Few Things
               </h2>
-              <p className="text-lg font-medium text-gray-700">
+              <p className="text-[#6b7280]">
                 Based on your idea, our AI strategist has identified a few areas
                 to dive deeper into.
               </p>
@@ -584,31 +548,31 @@ ${clarificationQuestions
               {clarificationQuestions.map((question, index) => (
                 <div
                   key={index}
-                  className="border-2 border-black bg-white p-6 shadow-[4px_4px_0px_#000]"
+                  className="rounded-xl border border-[#e5e7eb] bg-white p-5"
                 >
-                  <label className="mb-4 block font-black tracking-wide text-black uppercase">
+                  <label className="mb-3 block text-sm font-medium text-[#374151]">
                     {question}
                   </label>
                   <textarea
                     value={userClarificationAnswers[index]}
                     onChange={(e) => handleAnswerChange(index, e.target.value)}
-                    className="flex min-h-[80px] w-full border-2 border-black bg-white px-4 py-3 text-sm font-medium placeholder:text-gray-500 focus:border-[#E91E63] focus:ring-2 focus:ring-[#E91E63] focus:ring-offset-2 focus:outline-none"
+                    className="flex min-h-[80px] w-full rounded-lg border border-[#e5e7eb] bg-white px-4 py-3 text-sm placeholder:text-[#d1d5db] focus:border-[#8b5cf6] focus:ring-2 focus:ring-[#8b5cf6]/20 focus:outline-none"
                     placeholder="Your answer (optional)..."
                     rows={3}
                   />
                 </div>
               ))}
 
-              <div className="flex flex-col items-center gap-3 pt-6">
+              <div className="flex flex-col items-center gap-3 pt-4">
                 <Button
-                  variant="outline"
+                  variant="ghost"
                   onClick={() => handleNext()}
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-2 text-[#6b7280]"
                 >
                   <RefreshCw className="h-4 w-4" />
                   Skip and Use Current Details
                 </Button>
-                <p className="text-sm font-medium text-gray-600">
+                <p className="text-xs text-[#9ca3af]">
                   Answering these will significantly improve the quality and
                   specificity of your PRD.
                 </p>
@@ -616,8 +580,8 @@ ${clarificationQuestions
             </div>
 
             {prefillError && (
-              <div className="border-2 border-[#F44336] bg-[#FFEBEE] p-4 text-sm font-bold text-[#D32F2F]">
-                <span className="font-black">Error:</span> {prefillError}
+              <div className="rounded-lg bg-[#fef2f2] p-4 text-sm text-[#dc2626]">
+                <span className="font-medium">Error:</span> {prefillError}
               </div>
             )}
           </div>
@@ -626,22 +590,22 @@ ${clarificationQuestions
         {currentStep === 3 && (
           <div className="mx-auto max-w-4xl space-y-8">
             <div className="text-center">
-              <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center border-4 border-black bg-[#2196F3] shadow-[4px_4px_0px_#000]">
-                <Edit3 className="h-8 w-8 text-white" />
+              <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-xl bg-[#06b6d4]/10">
+                <Edit3 className="h-7 w-7 text-[#06b6d4]" />
               </div>
-              <h2 className="mb-3 text-3xl font-black tracking-wide text-black uppercase">
+              <h2 className="mb-3 text-2xl font-semibold tracking-tight text-[#111827]">
                 Review & Customize Details
               </h2>
-              <p className="text-lg font-medium text-gray-700">
+              <p className="text-[#6b7280]">
                 We&apos;ve pre-filled your PRD based on your idea and answers.
                 Review and edit any section as needed.
               </p>
             </div>
 
             <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
-              <div className="space-y-6">
+              <div className="space-y-5">
                 <div>
-                  <label className="mb-2 block text-sm leading-none font-black tracking-wide text-black uppercase">
+                  <label className="mb-1.5 block text-sm font-medium text-[#374151]">
                     Product Name
                   </label>
                   <input
@@ -650,7 +614,7 @@ ${clarificationQuestions
                     name="productName"
                     value={prdInput.productName}
                     onChange={handleChange}
-                    className="flex h-12 w-full border-2 border-black bg-white px-4 py-2 text-sm font-medium placeholder:text-gray-500 focus:border-[#2196F3] focus:ring-2 focus:ring-[#2196F3] focus:ring-offset-2 focus:outline-none"
+                    className="flex h-11 w-full rounded-lg border border-[#e5e7eb] bg-white px-4 py-2.5 text-sm placeholder:text-[#d1d5db] focus:border-[#06b6d4] focus:ring-2 focus:ring-[#06b6d4]/20 focus:outline-none"
                     placeholder="e.g., Apollo - The AI Trip Planner"
                   />
                 </div>
@@ -666,7 +630,7 @@ ${clarificationQuestions
                 />
               </div>
 
-              <div className="space-y-6">
+              <div className="space-y-5">
                 <TextareaField
                   label="Target Audience"
                   id="targetAudience"
@@ -727,8 +691,8 @@ ${clarificationQuestions
             </div>
 
             {generateError && (
-              <div className="border-2 border-[#F44336] bg-[#FFEBEE] p-4 text-sm font-bold text-[#D32F2F]">
-                <span className="font-black">Error:</span> {generateError}
+              <div className="rounded-lg bg-[#fef2f2] p-4 text-sm text-[#dc2626]">
+                <span className="font-medium">Error:</span> {generateError}
               </div>
             )}
           </div>
@@ -737,13 +701,13 @@ ${clarificationQuestions
         {currentStep === 4 && (
           <div className="space-y-8">
             <div className="text-center">
-              <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center border-4 border-black bg-[#4CAF50] shadow-[4px_4px_0px_#000]">
-                <FileText className="h-8 w-8 text-white" />
+              <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-xl bg-[#10b981]/10">
+                <FileText className="h-7 w-7 text-[#10b981]" />
               </div>
-              <h2 className="mb-3 text-3xl font-black tracking-wide text-black uppercase">
+              <h2 className="mb-3 text-2xl font-semibold tracking-tight text-[#111827]">
                 Your PRD is Ready!
               </h2>
-              <p className="text-lg font-medium text-gray-700">
+              <p className="text-[#6b7280]">
                 Here&apos;s your generated Product Requirements Document. You
                 can download it, copy it, or view in full page mode.
               </p>

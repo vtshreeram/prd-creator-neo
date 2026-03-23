@@ -1,0 +1,12 @@
+
+> prd-creator@0.1.0 dev
+> next dev --webpack
+
+▲ Next.js 16.2.1 (webpack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.1.2:3000
+✓ Ready in 129ms
+ ○ (pwa) PWA support is disabled.
+
+ GET / 200 in 953ms (next.js: 841ms, application-code: 112ms)
+ GET / 200 in 2.2s (next.js: 2.1s, application-code: 114ms)

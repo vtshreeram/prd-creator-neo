@@ -9,24 +9,21 @@ export interface TextareaFieldProps extends React.TextareaHTMLAttributes<HTMLTex
 const TextareaField = React.forwardRef<HTMLTextAreaElement, TextareaFieldProps>(
   ({ className, label, description, id, required, ...props }, ref) => {
     return (
-      <div className="space-y-2">
-        <label
-          htmlFor={id}
-          className="text-sm font-bold tracking-wide uppercase"
-        >
-          {label} {required && <span className="text-[#F44336]">*</span>}
+      <div className="space-y-1.5">
+        <label htmlFor={id} className="text-sm font-medium text-[#374151]">
+          {label} {required && <span className="text-[#dc2626]">*</span>}
         </label>
         <textarea
           id={id}
           className={cn(
-            'flex min-h-[100px] w-full border-2 border-black bg-white px-4 py-3 text-sm font-medium placeholder:text-gray-500 focus-visible:ring-2 focus-visible:ring-[#2196F3] focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:bg-gray-100 disabled:opacity-50',
+            'flex min-h-[100px] w-full rounded-lg border border-[#e5e7eb] bg-white px-4 py-3 text-sm text-[#374151] placeholder:text-[#9ca3af] focus:border-[#6366f1] focus:ring-2 focus:ring-[#6366f1]/20 focus:outline-none disabled:cursor-not-allowed disabled:bg-[#f9fafb] disabled:text-[#9ca3af]',
             className
           )}
           ref={ref}
           required={required}
           {...props}
         />
-        {description && <p className="text-sm text-gray-600">{description}</p>}
+        {description && <p className="text-xs text-[#6b7280]">{description}</p>}
       </div>
     );
   }

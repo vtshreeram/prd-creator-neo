@@ -5,29 +5,29 @@ import { cn } from '@/lib/utils';
 import { Loader2 } from 'lucide-react';
 
 const buttonVariants = cva(
-  'inline-flex items-center justify-center whitespace-nowrap text-sm font-bold uppercase tracking-wide ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 neo-press',
+  'inline-flex items-center justify-center whitespace-nowrap rounded-lg text-sm font-medium ring-offset-background transition-all duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
   {
     variants: {
       variant: {
         default:
-          'border-2 border-black bg-black text-white shadow-[2px_2px_0px_#000] hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[4px_4px_0px_#000] active:translate-x-[2px] active:translate-y-[2px] active:shadow-[1px_1px_0px_#000]',
+          'bg-[#374151] text-white hover:bg-[#1f2937] active:bg-[#111827]',
         primary:
-          'border-2 border-black bg-[#FFEB3B] text-black shadow-[2px_2px_0px_#000] hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[4px_4px_0px_#000] active:translate-x-[2px] active:translate-y-[2px] active:shadow-[1px_1px_0px_#000]',
+          'bg-[#6366f1] text-white hover:bg-[#4f46e5] active:bg-[#4338ca]',
         destructive:
-          'border-2 border-black bg-[#F44336] text-white shadow-[2px_2px_0px_#000] hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[4px_4px_0px_#000] active:translate-x-[2px] active:translate-y-[2px] active:shadow-[1px_1px_0px_#000]',
+          'bg-[#dc2626] text-white hover:bg-[#b91c1c] active:bg-[#991b1b]',
         outline:
-          'border-2 border-black bg-white text-black shadow-[2px_2px_0px_#000] hover:bg-gray-50 hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[4px_4px_0px_#000] active:translate-x-[2px] active:translate-y-[2px] active:shadow-[1px_1px_0px_#000]',
+          'border border-[#e5e7eb] bg-white text-[#374151] hover:bg-[#f9fafb] active:bg-[#f3f4f6]',
         secondary:
-          'border-2 border-black bg-[#2196F3] text-white shadow-[2px_2px_0px_#000] hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[4px_4px_0px_#000] active:translate-x-[2px] active:translate-y-[2px] active:shadow-[1px_1px_0px_#000]',
+          'bg-[#f3f4f6] text-[#374151] hover:bg-[#e5e7eb] active:bg-[#d1d5db]',
         ghost:
-          'border-2 border-transparent bg-transparent text-black hover:bg-gray-100 hover:border-gray-300',
-        link: 'text-[#2196F3] underline-offset-4 hover:underline border-0 shadow-none'
+          'bg-transparent text-[#374151] hover:bg-[#f3f4f6] active:bg-[#e5e7eb]',
+        link: 'text-[#6366f1] underline-offset-4 hover:underline'
       },
       size: {
-        default: 'h-11 px-6 py-2',
-        sm: 'h-9 px-4 py-1.5',
-        lg: 'h-12 px-8 py-3',
-        icon: 'h-11 w-11'
+        default: 'h-10 px-5 py-2',
+        sm: 'h-8 px-3 py-1 text-xs',
+        lg: 'h-11 px-8 py-3',
+        icon: 'h-10 w-10'
       }
     },
     defaultVariants: {

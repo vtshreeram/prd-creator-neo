@@ -161,13 +161,12 @@ export default function ImageAttachmentComponent({
 
   return (
     <div className="space-y-4">
-      {/* Upload Area */}
       {images.length < maxImages && (
         <div
-          className={`relative cursor-pointer border-4 border-dashed p-6 text-center transition-all ${
+          className={`relative cursor-pointer rounded-xl border-2 border-dashed p-6 text-center transition-all ${
             dragActive
-              ? 'scale-105 transform border-[#2196F3] bg-[#E3F2FD]'
-              : 'border-black hover:bg-gray-50'
+              ? 'border-[#6366f1] bg-[#6366f1]/5'
+              : 'border-[#e5e7eb] hover:border-[#d1d5db] hover:bg-[#f9fafb]'
           } `}
           onDragEnter={handleDrag}
           onDragLeave={handleDrag}
@@ -185,49 +184,44 @@ export default function ImageAttachmentComponent({
           />
 
           <div className="space-y-2">
-            <Upload className="mx-auto h-12 w-12 text-gray-400" />
+            <Upload className="mx-auto h-10 w-10 text-[#9ca3af]" />
             <div>
-              <p className="text-lg font-black tracking-wide text-black uppercase">
+              <p className="text-sm font-medium text-[#374151]">
                 {dragActive
                   ? 'Drop images here'
                   : 'Attach images to your product idea'}
               </p>
-              <p className="text-sm font-medium text-gray-600">
-                Drag and drop or click to select files
+              <p className="text-xs text-[#9ca3af]">
+                Drag and drop or click to select
               </p>
-              <p className="mt-1 text-xs font-bold text-gray-500">
+              <p className="mt-1 text-xs text-[#9ca3af]">
                 Max {maxImages} images • Max{' '}
                 {(maxFileSize / 1024 / 1024).toFixed(1)}MB each
-              </p>
-              <p className="text-xs font-bold text-gray-500">
-                Supports: JPEG, PNG, GIF, WebP
               </p>
             </div>
           </div>
         </div>
       )}
 
-      {/* Error Messages */}
       {errors.length > 0 && (
         <div className="space-y-2">
           {errors.map((error, index) => (
             <div
               key={index}
-              className="flex items-center space-x-2 text-sm font-bold text-[#D32F2F]"
+              className="flex items-center space-x-2 text-xs text-[#dc2626]"
             >
-              <AlertCircle className="h-4 w-4 flex-shrink-0" />
+              <AlertCircle className="h-3.5 w-3.5 flex-shrink-0" />
               <span>{error}</span>
             </div>
           ))}
         </div>
       )}
 
-      {/* Image Previews */}
       {images.length > 0 && (
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <h3 className="flex items-center space-x-2 text-lg font-black tracking-wide text-black uppercase">
-              <ImageIcon className="h-5 w-5" />
+            <h3 className="flex items-center gap-2 text-sm font-medium text-[#374151]">
+              <ImageIcon className="h-4 w-4 text-[#6b7280]" />
               <span>
                 Attached Images ({images.length}/{maxImages})
               </span>
@@ -236,18 +230,18 @@ export default function ImageAttachmentComponent({
               <button
                 type="button"
                 onClick={openFileDialog}
-                className="text-sm font-bold text-[#2196F3] hover:text-[#1976D2]"
+                className="text-xs font-medium text-[#6366f1] hover:text-[#4f46e5]"
               >
                 Add More
               </button>
             )}
           </div>
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {images.map((image) => (
               <div
                 key={image.id}
-                className="group relative overflow-hidden border-2 border-black bg-white shadow-[4px_4px_0px_#000]"
+                className="group relative overflow-hidden rounded-xl border border-[#e5e7eb] bg-white"
               >
                 <div className="relative aspect-square">
                   <img
@@ -259,17 +253,17 @@ export default function ImageAttachmentComponent({
                   <button
                     type="button"
                     onClick={() => removeImage(image.id)}
-                    className="absolute top-2 right-2 border-2 border-black bg-white p-1.5 opacity-0 shadow-[2px_2px_0px_#000] transition-all group-hover:opacity-100 hover:bg-[#F44336] hover:text-white"
+                    className="absolute top-2 right-2 rounded-lg bg-white/90 p-1.5 opacity-0 shadow-sm transition-all group-hover:opacity-100 hover:bg-[#fef2f2] hover:text-[#dc2626]"
                     title="Remove image"
                   >
-                    <X className="h-4 w-4" />
+                    <X className="h-3.5 w-3.5" />
                   </button>
                 </div>
-                <div className="space-y-1 border-t-2 border-black p-3">
-                  <p className="truncate text-sm font-bold text-black">
+                <div className="border-t border-[#e5e7eb] px-3 py-2">
+                  <p className="truncate text-xs font-medium text-[#374151]">
                     {image.name}
                   </p>
-                  <p className="text-xs font-bold text-gray-600">
+                  <p className="text-xs text-[#9ca3af]">
                     {formatFileSize(image.size)} •{' '}
                     {image.type.split('/')[1].toUpperCase()}
                   </p>
