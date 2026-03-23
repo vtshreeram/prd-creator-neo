@@ -138,59 +138,85 @@ ${imageContext}
 # ${inputs.productName || 'Product Requirements Document'}
 
 ## Executive Summary
-(Provide a high-level overview of the entire PRD)
+*(Provide a concise, high-level overview of the product, its value proposition, target audience, and primary objective for this release.)*
 
 ## Project Overview
 ### Mission & Core Principles
+*(Define the core mission of this product and 3-4 guiding principles for the development team.)*
 ### Problem Statement
+*(Clearly articulate the exact pain points and problems the users are currently facing.)*
 ### Goals & Objectives
+*(List the primary business and product goals using the SMART framework - Specific, Measurable, Achievable, Relevant, Time-bound.)*
 ### Success Criteria
+*(Detail the quantifiable metrics, KPIs, or OKRs that will determine if this product launch is successful.)*
 
 ## Target Audience, Users & Personas
-(Detail the target audience and provide 2-3 specific user personas with examples)
+*(Detail the target audience demographics and psychographics. Provide 2-3 specific User Personas, including their background, goals, frustrations, and use cases.)*
 
 ## MVP Scope (In Scope / Out of Scope)
 ### In Scope (MVP)
+*(Use bullet points to define exactly what features and capabilities MUST be delivered in this release.)*
 ### Out of Scope
+*(Explicitly list features, integrations, or capabilities that are deliberately excluded from this release to prevent scope creep.)*
 
 ## User Stories & Use Cases
-(Provide detailed user stories with examples in the format: As a [user], I want [action], so that [benefit])
+*(Provide detailed agile user stories for the core features. Format: "As a [type of user], I want to [perform some action] so that I can [achieve some goal]." Include Acceptance Criteria for each story.)*
 
 ## Functional Requirements
+*(Break down the core features into explicit, testable system behaviors and functional requirements.)*
 
 ## Tools / Features Specification
+*(Detail the specific tools, 3rd-party integrations, external APIs, or libraries required to make these features work.)*
 
 ## Technical Requirements
 ### Technology Stack
+*(List the exact frontend, backend, database, and infrastructure technologies to be used.)*
 ### Core Architecture & System Design (incl. patterns)
+*(Describe the architectural patterns - e.g., Microservices, Event-Driven, Monolith - and why they were chosen.)*
 ### System Architecture
+*(Provide a structural overview of how the frontend, backend, database, and external services interact.)*
 ### Data Model
+*(Define the high-level entity-relationship model, listing primary data entities and their relationships.)*
 ### API Specifications
+*(Provide a Markdown table detailing the core REST/GraphQL endpoints required, including Method, Endpoint, and Purpose.)*
 
 ## UI/UX Requirements
+*(Detail design system requirements, accessibility standards (e.g., WCAG AA), responsiveness targets, and core user flows.)*
 
 ## Security & Configuration Requirements
+*(List authentication/authorization methods, data encryption (at rest and in transit), compliance needs (e.g., GDPR, SOC2), and environment configuration strategies.)*
 
 ## Performance Requirements
+*(Define maximum acceptable latency, page load times, API response times, and target uptime/SLA.)*
 
 ## Scalability Requirements
+*(Explain how the system should handle increased load, including concurrent user targets and database scaling strategies.)*
 
 ## Testing Strategy
+*(Outline the approach for Unit Testing, Integration Testing, End-to-End (E2E) Testing, and User Acceptance Testing (UAT).)*
 
 ## Deployment Strategy
+*(Describe the CI/CD pipeline, environment progression (Dev -> Staging -> Prod), and release strategies like feature flags or canary rollouts.)*
 
 ## Monitoring & Maintenance
+*(List the tools and strategies for logging, error tracking, performance monitoring, and incident alerting.)*
 
 ## Documentation Requirements
+*(Specify the required documentation deliverables, such as API docs, user manuals, and system architecture diagrams.)*
 
 ## Timeline, Milestones & Implementation Phases
+*(Break down the development lifecycle into specific phases - e.g., Discovery, Design, Alpha, Beta, GA - with estimated timelines based on user input.)*
 
 ## Budget & Resources
+*(Detail the required team topology - e.g., 2 Frontend, 1 Backend, 1 QA - and align with the user's provided budget/resource constraints.)*
 
 ## Risks & Mitigation
+*(Provide a Markdown table of potential project risks (Technical, Schedule, Scope) along with their Impact, Probability, and a specific Mitigation Strategy.)*
 
 ## Future Considerations / Roadmap
+*(List the features, enhancements, and technical debt items reserved for V2, V3, or future roadmap consideration.)*
 
-Write the complete PRD now, populating each of the modules above with rich, professional, and contextually accurate product management content based on the user's inputs. Do not omit any sections.
+---
+**CRITICAL INSTRUCTION**: Do not omit any sections. Write the complete PRD now, populating each of the modules above with rich, professional, and contextually accurate product management content based on the user's inputs. Format beautifully with Markdown tables, bold text, and lists where appropriate.
   `;
 }
