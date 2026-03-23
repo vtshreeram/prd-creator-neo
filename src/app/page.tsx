@@ -105,8 +105,8 @@ export default function Home() {
         onSavedDraftsClick={() => setIsSavedDraftsOpen(true)}
       />
 
-      <main className="container mx-auto min-h-0 flex-grow px-4 py-8">
-        <div className="mx-auto flex h-full min-h-0 max-w-7xl flex-col">
+      <main className="container mx-auto min-h-0 max-w-[1600px] flex-grow px-4 py-8">
+        <div className="mx-auto flex h-full min-h-0 w-full flex-col">
           {/* Setup Prompt Banner */}
           {showSetupPrompt && (
             <div className="mb-6 rounded-xl border border-[#e5e7eb] bg-white p-6 shadow-sm">
@@ -147,7 +147,7 @@ export default function Home() {
           )}
 
           {/* Main Content - Wizard Only */}
-          <div className="mx-auto w-full max-w-6xl">
+          <div className="w-full flex-1">
             <PRDWizard
               apiKey={apiKey}
               selectedModel={selectedModel}
@@ -163,12 +163,12 @@ export default function Home() {
               onFullPageView={handleFullPageView}
               onResetState={handleResetState}
             />
-            </div>
-            </div>
-            </main>
+          </div>
+        </div>
+      </main>
 
-            {/* Settings Modal */}
-            <SettingsModal
+      {/* Settings Modal */}
+      <SettingsModal
         isOpen={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}
         onSave={handleSaveSettings}

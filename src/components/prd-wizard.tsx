@@ -2,14 +2,16 @@
 
 import { useState } from 'react';
 import {
-  ArrowLeft,
   ArrowRight,
   Sparkles,
   Edit3,
   FileText,
   Camera,
   MessageSquare,
-  RefreshCw
+  Cloud,
+  Bot,
+  Smartphone,
+  Wand2
 } from 'lucide-react';
 import { PrdInput, DEFAULT_PRD_INPUT, ImageAttachment } from '@/lib/prd';
 import { Button } from './button';
@@ -269,24 +271,6 @@ ${clarificationQuestions
     prdInput.productName.trim().length > 0 &&
     prdInput.problemStatement.trim().length > 0;
 
-  const handleNext = () => {
-    if (currentStep === 1 && canGoToStep2) {
-      handleIdeaSubmit();
-    } else if (currentStep === 2) {
-      handleClarificationSubmit();
-    } else if (currentStep === 3 && canGoToStep4) {
-      handleGeneratePRD();
-    } else if (currentStep === 4) {
-      handleFinish();
-    }
-  };
-
-  const handlePrevious = () => {
-    if (currentStep > 1) {
-      setCurrentStep((currentStep - 1) as 1 | 2 | 3);
-    }
-  };
-
   const handleFullPageView = () => {
     if (onFullPageView) {
       onFullPageView();
@@ -335,19 +319,16 @@ ${clarificationQuestions
   };
 
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col bg-white">
-      <div className="mb-10 p-4">
-        <div className="relative">
-          <div className="absolute top-6 right-0 left-0 h-1 bg-[#e5e7eb]">
-            <div
-              className="h-full bg-[#6366f1] transition-all duration-500"
-              style={{
-                width: `${((currentStep - 1) / (steps.length - 1)) * 100}%`
-              }}
-            />
+    <div className="mx-auto flex w-full flex-col gap-6 bg-transparent md:flex-row">
+      {/* Sidebar Navigation */}
+      <div className="w-full flex-shrink-0 md:w-64 lg:w-72">
+        <div className="sticky top-24 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+          <div className="mb-4 px-2">
+            <h3 className="text-xs font-semibold tracking-wider text-gray-500 uppercase">
+              PRD Creation Flow
+            </h3>
           </div>
-
-          <div className="relative flex items-center justify-between">
+          <div className="space-y-1">
             {steps.map((step) => {
               const Icon = step.icon;
               const isActive = currentStep === step.id;
@@ -359,375 +340,408 @@ ${clarificationQuestions
                 (step.id === 4 && canGoToStep4);
 
               return (
-                <div key={step.id} className="flex flex-col items-center">
-                  <button
-                    onClick={() => isClickable && handleStepClick(step.id)}
-                    disabled={!isClickable}
-                    className={`relative z-10 flex h-12 w-12 transform items-center justify-center rounded-full transition-all duration-300 ${
+                <button
+                  key={step.id}
+                  onClick={() => isClickable && handleStepClick(step.id)}
+                  disabled={!isClickable}
+                  className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium transition-colors ${
+                    isActive
+                      ? 'bg-blue-50 text-blue-700'
+                      : isCompleted
+                        ? 'text-gray-900 hover:bg-gray-100'
+                        : isClickable
+                          ? 'text-gray-600 hover:bg-gray-50'
+                          : 'cursor-not-allowed text-gray-400'
+                  }`}
+                >
+                  <Icon
+                    className={`h-5 w-5 flex-shrink-0 ${
                       isActive
-                        ? 'bg-[#6366f1] text-white shadow-lg ring-4 ring-[#6366f1]/20'
+                        ? 'text-blue-600'
                         : isCompleted
-                          ? 'bg-[#10b981] text-white'
-                          : isClickable
-                            ? 'border border-[#e5e7eb] bg-white text-[#6b7280] hover:border-[#6366f1]/50 hover:text-[#6366f1]'
-                            : 'cursor-not-allowed bg-[#f9fafb] text-[#d1d5db]'
-                    } `}
-                  >
-                    <Icon className="h-5 w-5" />
-                  </button>
-                  <div className="mt-3 text-center">
-                    <p
-                      className={`text-xs font-medium ${
-                        isActive
-                          ? 'text-[#6366f1]'
-                          : isCompleted
-                            ? 'text-[#10b981]'
-                            : 'text-[#9ca3af]'
-                      }`}
-                    >
-                      {step.title}
-                    </p>
-                  </div>
-                </div>
+                          ? 'text-green-500'
+                          : 'text-gray-400'
+                    }`}
+                  />
+                  <span className="flex-1 truncate">{step.title}</span>
+                </button>
               );
             })}
           </div>
-        </div>
-      </div>
 
-      <div className="mb-6 flex justify-center">
-        <div className="inline-flex items-center rounded-full bg-[#f3f4f6] px-4 py-1.5 text-xs font-medium text-[#6b7280]">
-          <span className="mr-2 h-1.5 w-1.5 rounded-full bg-[#10b981]"></span>
-          {modelDisplayName || selectedModel}
-        </div>
-      </div>
-
-      <div className="sticky top-0 z-40 mb-6 rounded-xl border border-[#e5e7eb] bg-white/90 px-4 py-3 backdrop-blur-md">
-        <div className="flex items-center justify-between">
-          <Button
-            variant="ghost"
-            onClick={handlePrevious}
-            disabled={currentStep === 1}
-            className="flex items-center gap-2 text-[#6b7280]"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Previous
-          </Button>
-
-          <div className="flex items-center gap-1 text-sm font-medium text-[#374151]">
-            <span className="text-[#6366f1]">Step {currentStep}</span>
-            <span className="text-[#d1d5db]">of {steps.length}</span>
-          </div>
-
-          <Button
-            variant="primary"
-            onClick={handleNext}
-            disabled={
-              (currentStep === 1 && !canGoToStep2) ||
-              (currentStep === 3 && isGenerating)
-            }
-            isLoading={isClarifying || isPrefilling || isGenerating}
-            className="flex items-center gap-2"
-          >
-            {currentStep === 4 ? 'Start New Idea' : 'Next'}
-            {currentStep < 4 && <ArrowRight className="h-4 w-4" />}
-          </Button>
-        </div>
-      </div>
-
-      <div className="min-h-[500px] rounded-xl border border-[#e5e7eb] bg-white p-6 shadow-sm sm:p-10">
-        {currentStep === 1 && (
-          <div className="mx-auto max-w-3xl space-y-8">
-            <div className="text-center">
-              <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-xl bg-[#6366f1]/10">
-                <Sparkles className="h-7 w-7 text-[#6366f1]" />
+          <div className="mt-8 border-t border-gray-100 pt-4">
+            <div className="rounded-lg bg-gray-50 p-3">
+              <div className="flex items-center gap-2 text-xs font-medium text-gray-500">
+                <span className="relative flex h-2 w-2">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-blue-400 opacity-75"></span>
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-blue-500"></span>
+                </span>
+                Active Model
               </div>
-              <h2 className="mb-3 text-2xl font-semibold tracking-tight text-[#111827]">
-                What&apos;s Your Product Idea?
-              </h2>
-              <p className="text-[#6b7280]">
-                Tell us about your product in a few sentences, and we&apos;ll
-                help you build a comprehensive PRD.
-              </p>
+              <div className="mt-1 truncate text-sm font-semibold text-gray-900">
+                {modelDisplayName || selectedModel}
+              </div>
             </div>
+          </div>
+        </div>
+      </div>
 
-            <div className="space-y-8 text-left">
-              <div className="space-y-4">
-                <label className="text-sm font-medium text-[#374151]">
-                  Product Mode
-                </label>
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                  {(
-                    [
-                      'SaaS Product',
-                      'AI Product',
-                      'Mobile App',
-                      'Feature Enhancement'
-                    ] as const
-                  ).map((mode) => (
-                    <button
-                      key={mode}
-                      onClick={() =>
-                        setInternalPrdInput((prev) => ({
-                          ...prev,
-                          productMode: mode
-                        }))
-                      }
-                      className={`flex flex-col items-center justify-center rounded-lg border p-3 text-center text-xs font-medium transition-all ${
-                        prdInput.productMode === mode
-                          ? 'border-[#6366f1] bg-[#6366f1]/5 text-[#6366f1]'
-                          : 'border-[#e5e7eb] bg-white text-[#6b7280] hover:border-[#d1d5db]'
-                      }`}
-                    >
-                      <span>{mode}</span>
-                    </button>
-                  ))}
+      {/* Main Content Area */}
+      <div className="flex min-w-0 flex-1 flex-col">
+        <div className="min-h-[500px] rounded-xl border border-gray-200 bg-white p-6 shadow-sm sm:p-10">
+          {currentStep === 1 && (
+            <div className="mx-auto max-w-3xl space-y-8">
+              <div className="text-center">
+                <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-xl bg-[#6366f1]/10">
+                  <Sparkles className="h-7 w-7 text-[#6366f1]" />
                 </div>
-                <p className="text-xs text-[#9ca3af]">
-                  Select the mode that best fits your product idea to get
-                  tailored results.
+                <h2 className="mb-3 text-2xl font-semibold tracking-tight text-[#111827]">
+                  What&apos;s Your Product Idea?
+                </h2>
+                <p className="text-[#6b7280]">
+                  Tell us about your product in a few sentences, and we&apos;ll
+                  help you build a comprehensive PRD.
                 </p>
               </div>
 
-              <TextareaField
-                label="Product Idea"
-                id="productIdea"
-                name="productIdea"
-                value={productIdea}
-                onChange={(e) => setProductIdea(e.target.value)}
-                placeholder="e.g., A mobile app that helps remote workers find and book coworking spaces with real-time availability..."
-                rows={8}
-                description="Describe your product concept, target users, and key features in your own words."
-              />
-
-              <div className="rounded-xl border border-[#e5e7eb] bg-[#f9fafb] p-6">
-                <h3 className="mb-2 flex items-center gap-2 text-sm font-medium text-[#374151]">
-                  <Camera className="h-4 w-4 text-[#6b7280]" />
-                  Add Visual Context{' '}
-                  <span className="text-xs font-normal text-[#9ca3af]">
-                    (Optional)
-                  </span>
-                </h3>
-                <p className="mb-4 text-xs text-[#9ca3af]">
-                  Attach mockups, diagrams, wireframes, or reference photos to
-                  help the AI better understand your product idea.
-                </p>
-                <ImageAttachmentComponent
-                  images={productIdeaImages}
-                  onImagesChange={setProductIdeaImages}
-                  maxImages={5}
-                  maxFileSize={10 * 1024 * 1024}
-                />
-              </div>
-            </div>
-
-            {prefillError && (
-              <div className="rounded-lg bg-[#fef2f2] p-4 text-sm text-[#dc2626]">
-                <span className="font-medium">Error:</span> {prefillError}
-              </div>
-            )}
-          </div>
-        )}
-
-        {currentStep === 2 && (
-          <div className="mx-auto max-w-3xl space-y-8">
-            <div className="text-center">
-              <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-xl bg-[#8b5cf6]/10">
-                <MessageSquare className="h-7 w-7 text-[#8b5cf6]" />
-              </div>
-              <h2 className="mb-3 text-2xl font-semibold tracking-tight text-[#111827]">
-                Let&apos;s Clarify a Few Things
-              </h2>
-              <p className="text-[#6b7280]">
-                Based on your idea, our AI strategist has identified a few areas
-                to dive deeper into.
-              </p>
-            </div>
-
-            <div className="space-y-6 text-left">
-              {clarificationQuestions.map((question, index) => (
-                <div
-                  key={index}
-                  className="rounded-xl border border-[#e5e7eb] bg-white p-5"
-                >
-                  <label className="mb-3 block text-sm font-medium text-[#374151]">
-                    {question}
+              <div className="space-y-8 text-left">
+                <div className="space-y-4">
+                  <label className="text-sm font-medium text-[#374151]">
+                    Product Mode
                   </label>
-                  <textarea
-                    value={userClarificationAnswers[index]}
-                    onChange={(e) => handleAnswerChange(index, e.target.value)}
-                    className="flex min-h-[80px] w-full rounded-lg border border-[#e5e7eb] bg-white px-4 py-3 text-sm placeholder:text-[#d1d5db] focus:border-[#8b5cf6] focus:ring-2 focus:ring-[#8b5cf6]/20 focus:outline-none"
-                    placeholder="Your answer (optional)..."
-                    rows={3}
+                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                    {(
+                      [
+                        { id: 'SaaS Product', icon: Cloud, label: 'SaaS' },
+                        { id: 'AI Product', icon: Bot, label: 'AI App' },
+                        { id: 'Mobile App', icon: Smartphone, label: 'Mobile' },
+                        {
+                          id: 'Feature Enhancement',
+                          icon: Wand2,
+                          label: 'Feature'
+                        }
+                      ] as const
+                    ).map((mode) => {
+                      const ModeIcon = mode.icon;
+                      return (
+                        <button
+                          key={mode.id}
+                          onClick={() =>
+                            setInternalPrdInput((prev) => ({
+                              ...prev,
+                              productMode: mode.id as PrdInput['productMode']
+                            }))
+                          }
+                          className={`flex flex-col items-center justify-center gap-2 rounded-xl border-2 p-4 text-center transition-all ${
+                            prdInput.productMode === mode.id
+                              ? 'border-blue-600 bg-blue-50 text-blue-700'
+                              : 'border-gray-100 bg-white text-gray-500 hover:border-gray-200 hover:bg-gray-50'
+                          }`}
+                        >
+                          <ModeIcon
+                            className={`h-6 w-6 ${prdInput.productMode === mode.id ? 'text-blue-600' : 'text-gray-400'}`}
+                          />
+                          <span className="text-sm font-semibold">
+                            {mode.label}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <p className="text-xs text-[#9ca3af]">
+                    Select the mode that best fits your product idea to get
+                    tailored results.
+                  </p>
+                </div>
+
+                <TextareaField
+                  label="Product Idea"
+                  id="productIdea"
+                  name="productIdea"
+                  value={productIdea}
+                  onChange={(e) => setProductIdea(e.target.value)}
+                  placeholder="e.g., A mobile app that helps remote workers find and book coworking spaces with real-time availability..."
+                  rows={8}
+                  description="Describe your product concept, target users, and key features in your own words."
+                />
+
+                <div className="rounded-xl border border-[#e5e7eb] bg-[#f9fafb] p-6">
+                  <h3 className="mb-2 flex items-center gap-2 text-sm font-medium text-[#374151]">
+                    <Camera className="h-4 w-4 text-[#6b7280]" />
+                    Add Visual Context{' '}
+                    <span className="text-xs font-normal text-[#9ca3af]">
+                      (Optional)
+                    </span>
+                  </h3>
+                  <p className="mb-4 text-xs text-[#9ca3af]">
+                    Attach mockups, diagrams, wireframes, or reference photos to
+                    help the AI better understand your product idea.
+                  </p>
+                  <ImageAttachmentComponent
+                    images={productIdeaImages}
+                    onImagesChange={setProductIdeaImages}
+                    maxImages={5}
+                    maxFileSize={10 * 1024 * 1024}
                   />
                 </div>
-              ))}
+              </div>
 
-              <div className="flex flex-col items-center gap-3 pt-4">
+              {prefillError && currentStep === 1 && (
+                <div className="rounded-lg bg-[#fef2f2] p-4 text-sm text-[#dc2626]">
+                  <span className="font-medium">Error:</span> {prefillError}
+                </div>
+              )}
+
+              <div className="mt-8 flex justify-end border-t border-gray-100 pt-6">
+                <Button
+                  onClick={handleIdeaSubmit}
+                  disabled={!canGoToStep2 || isClarifying}
+                  isLoading={isClarifying}
+                  variant="primary"
+                  className="px-8"
+                >
+                  Analyze Idea <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          )}
+          {currentStep === 2 && (
+            <div className="mx-auto max-w-3xl space-y-8">
+              <div className="text-center">
+                <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-xl bg-[#8b5cf6]/10">
+                  <MessageSquare className="h-7 w-7 text-[#8b5cf6]" />
+                </div>
+                <h2 className="mb-3 text-2xl font-semibold tracking-tight text-[#111827]">
+                  Let&apos;s Clarify a Few Things
+                </h2>
+                <p className="text-[#6b7280]">
+                  Based on your idea, our AI strategist has identified a few
+                  areas to dive deeper into.
+                </p>
+              </div>
+
+              <div className="space-y-6 text-left">
+                {clarificationQuestions.map((question, index) => (
+                  <div
+                    key={index}
+                    className="rounded-xl border border-[#e5e7eb] bg-white p-5"
+                  >
+                    <label className="mb-3 block text-sm font-medium text-[#374151]">
+                      {question}
+                    </label>
+                    <textarea
+                      value={userClarificationAnswers[index]}
+                      onChange={(e) =>
+                        handleAnswerChange(index, e.target.value)
+                      }
+                      className="flex min-h-[80px] w-full rounded-lg border border-[#e5e7eb] bg-white px-4 py-3 text-sm placeholder:text-[#d1d5db] focus:border-[#8b5cf6] focus:ring-2 focus:ring-[#8b5cf6]/20 focus:outline-none"
+                      placeholder="Your answer (optional)..."
+                      rows={3}
+                    />
+                  </div>
+                ))}
+
+                <div className="flex flex-col items-center gap-3 pt-4 pb-6">
+                  <p className="text-xs text-[#9ca3af]">
+                    Answering these will significantly improve the quality and
+                    specificity of your PRD.
+                  </p>
+                </div>
+              </div>
+
+              {prefillError && currentStep === 2 && (
+                <div className="rounded-lg bg-[#fef2f2] p-4 text-sm text-[#dc2626]">
+                  <span className="font-medium">Error:</span> {prefillError}
+                </div>
+              )}
+
+              <div className="mt-8 flex flex-col-reverse justify-end gap-3 border-t border-gray-100 pt-6 sm:flex-row">
                 <Button
                   variant="ghost"
-                  onClick={() => handleNext()}
-                  className="flex items-center gap-2 text-[#6b7280]"
+                  onClick={handleClarificationSubmit}
+                  disabled={isPrefilling}
+                  className="sm:w-auto"
                 >
-                  <RefreshCw className="h-4 w-4" />
-                  Skip and Use Current Details
+                  Skip Questions
                 </Button>
-                <p className="text-xs text-[#9ca3af]">
-                  Answering these will significantly improve the quality and
-                  specificity of your PRD.
+                <Button
+                  onClick={handleClarificationSubmit}
+                  isLoading={isPrefilling}
+                  disabled={isPrefilling}
+                  variant="primary"
+                  className="px-8 sm:w-auto"
+                >
+                  Submit & Auto-fill PRD <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          )}
+          {currentStep === 3 && (
+            <div className="mx-auto max-w-4xl space-y-8">
+              <div className="text-center">
+                <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-xl bg-[#06b6d4]/10">
+                  <Edit3 className="h-7 w-7 text-[#06b6d4]" />
+                </div>
+                <h2 className="mb-3 text-2xl font-semibold tracking-tight text-[#111827]">
+                  Review & Customize Details
+                </h2>
+                <p className="text-[#6b7280]">
+                  We&apos;ve pre-filled your PRD based on your idea and answers.
+                  Review and edit any section as needed.
                 </p>
               </div>
-            </div>
 
-            {prefillError && (
-              <div className="rounded-lg bg-[#fef2f2] p-4 text-sm text-[#dc2626]">
-                <span className="font-medium">Error:</span> {prefillError}
-              </div>
-            )}
-          </div>
-        )}
+              <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+                <div className="space-y-5">
+                  <div>
+                    <label className="mb-1.5 block text-sm font-medium text-[#374151]">
+                      Product Name
+                    </label>
+                    <input
+                      type="text"
+                      id="productName"
+                      name="productName"
+                      value={prdInput.productName}
+                      onChange={handleChange}
+                      className="flex h-11 w-full rounded-lg border border-[#e5e7eb] bg-white px-4 py-2.5 text-sm placeholder:text-[#d1d5db] focus:border-[#06b6d4] focus:ring-2 focus:ring-[#06b6d4]/20 focus:outline-none"
+                      placeholder="e.g., Apollo - The AI Trip Planner"
+                    />
+                  </div>
 
-        {currentStep === 3 && (
-          <div className="mx-auto max-w-4xl space-y-8">
-            <div className="text-center">
-              <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-xl bg-[#06b6d4]/10">
-                <Edit3 className="h-7 w-7 text-[#06b6d4]" />
-              </div>
-              <h2 className="mb-3 text-2xl font-semibold tracking-tight text-[#111827]">
-                Review & Customize Details
-              </h2>
-              <p className="text-[#6b7280]">
-                We&apos;ve pre-filled your PRD based on your idea and answers.
-                Review and edit any section as needed.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
-              <div className="space-y-5">
-                <div>
-                  <label className="mb-1.5 block text-sm font-medium text-[#374151]">
-                    Product Name
-                  </label>
-                  <input
-                    type="text"
-                    id="productName"
-                    name="productName"
-                    value={prdInput.productName}
+                  <TextareaField
+                    label="Problem Statement"
+                    id="problemStatement"
+                    name="problemStatement"
+                    value={prdInput.problemStatement}
                     onChange={handleChange}
-                    className="flex h-11 w-full rounded-lg border border-[#e5e7eb] bg-white px-4 py-2.5 text-sm placeholder:text-[#d1d5db] focus:border-[#06b6d4] focus:ring-2 focus:ring-[#06b6d4]/20 focus:outline-none"
-                    placeholder="e.g., Apollo - The AI Trip Planner"
+                    placeholder="What problem does your product solve?"
+                    rows={6}
                   />
                 </div>
 
-                <TextareaField
-                  label="Problem Statement"
-                  id="problemStatement"
-                  name="problemStatement"
-                  value={prdInput.problemStatement}
-                  onChange={handleChange}
-                  placeholder="What problem does your product solve?"
-                  rows={6}
-                />
-              </div>
-
-              <div className="space-y-5">
-                <TextareaField
-                  label="Target Audience"
-                  id="targetAudience"
-                  name="targetAudience"
-                  value={prdInput.targetAudience}
-                  onChange={handleChange}
-                  placeholder="Who are your target users?"
-                  rows={6}
-                />
-
-                {prdInput.productMode === 'Feature Enhancement' ? (
-                  <>
-                    <TextareaField
-                      label="Current State (Before)"
-                      id="currentState"
-                      name="currentState"
-                      value={prdInput.currentState}
-                      onChange={handleChange}
-                      placeholder="Describe the current implementation or feature set..."
-                      rows={4}
-                    />
-                    <TextareaField
-                      label="Proposed Changes (After)"
-                      id="proposedChanges"
-                      name="proposedChanges"
-                      value={prdInput.proposedChanges}
-                      onChange={handleChange}
-                      placeholder="Describe the specific enhancements or changes..."
-                      rows={4}
-                    />
-                  </>
-                ) : (
+                <div className="space-y-5">
                   <TextareaField
-                    label="Key Features"
-                    id="keyFeatures"
-                    name="keyFeatures"
-                    value={prdInput.keyFeatures}
+                    label="Target Audience"
+                    id="targetAudience"
+                    name="targetAudience"
+                    value={prdInput.targetAudience}
                     onChange={handleChange}
-                    placeholder="What are the main features that differentiate your product?"
+                    placeholder="Who are your target users?"
                     rows={6}
-                    description="List the key differentiating features that make your product unique and valuable."
                   />
-                )}
+
+                  {prdInput.productMode === 'Feature Enhancement' ? (
+                    <>
+                      <TextareaField
+                        label="Current State (Before)"
+                        id="currentState"
+                        name="currentState"
+                        value={prdInput.currentState}
+                        onChange={handleChange}
+                        placeholder="Describe the current implementation or feature set..."
+                        rows={4}
+                      />
+                      <TextareaField
+                        label="Proposed Changes (After)"
+                        id="proposedChanges"
+                        name="proposedChanges"
+                        value={prdInput.proposedChanges}
+                        onChange={handleChange}
+                        placeholder="Describe the specific enhancements or changes..."
+                        rows={4}
+                      />
+                    </>
+                  ) : (
+                    <TextareaField
+                      label="Key Features"
+                      id="keyFeatures"
+                      name="keyFeatures"
+                      value={prdInput.keyFeatures}
+                      onChange={handleChange}
+                      placeholder="What are the main features that differentiate your product?"
+                      rows={6}
+                      description="List the key differentiating features that make your product unique and valuable."
+                    />
+                  )}
+                </div>
+
+                <div className="md:col-span-2">
+                  <TextareaField
+                    label="Success Metrics"
+                    id="successMetrics"
+                    name="successMetrics"
+                    value={prdInput.successMetrics}
+                    onChange={handleChange}
+                    placeholder="How will you measure success?"
+                    rows={4}
+                    description="Define specific, measurable KPIs and targets to track product success (e.g., User retention > 40%, 10k MAU in 6 months)."
+                  />
+                </div>
               </div>
 
-              <div className="md:col-span-2">
-                <TextareaField
-                  label="Success Metrics"
-                  id="successMetrics"
-                  name="successMetrics"
-                  value={prdInput.successMetrics}
-                  onChange={handleChange}
-                  placeholder="How will you measure success?"
-                  rows={4}
-                  description="Define specific, measurable KPIs and targets to track product success (e.g., User retention > 40%, 10k MAU in 6 months)."
+              {generateError && (
+                <div className="rounded-lg bg-[#fef2f2] p-4 text-sm text-[#dc2626]">
+                  <span className="font-medium">Error:</span> {generateError}
+                </div>
+              )}
+
+              <div className="mt-8 flex justify-end border-t border-gray-100 pt-6">
+                <Button
+                  onClick={handleGeneratePRD}
+                  disabled={!canGoToStep4 || isGenerating}
+                  isLoading={isGenerating}
+                  variant="primary"
+                  className="px-8"
+                >
+                  Generate Final PRD <Sparkles className="ml-2 h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          )}
+          {currentStep === 4 && (
+            <div className="space-y-8">
+              <div className="text-center">
+                <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-xl bg-[#10b981]/10">
+                  <FileText className="h-7 w-7 text-[#10b981]" />
+                </div>
+                <h2 className="mb-3 text-2xl font-semibold tracking-tight text-[#111827]">
+                  Your PRD is Ready!
+                </h2>
+                <p className="text-[#6b7280]">
+                  Here&apos;s your generated Product Requirements Document. You
+                  can download it, copy it, or view in full page mode.
+                </p>
+              </div>
+
+              {isGenerating ? (
+                <div className="flex justify-center py-16">
+                  <Loader />
+                </div>
+              ) : (
+                <PRDDisplay
+                  content={generatedPrd}
+                  productName={prdInput.productName || 'PRD'}
+                  prdInputs={prdInput}
+                  model={selectedModel}
+                  onFullPageView={handleFullPageView}
                 />
-              </div>
+              )}
+
+              {!isGenerating && (
+                <div className="mt-8 flex justify-center border-t border-gray-100 pt-6">
+                  <Button
+                    onClick={handleFinish}
+                    variant="outline"
+                    className="px-8 text-gray-600"
+                  >
+                    <Sparkles className="mr-2 h-4 w-4" />
+                    Start New Product Idea
+                  </Button>
+                </div>
+              )}
             </div>
-
-            {generateError && (
-              <div className="rounded-lg bg-[#fef2f2] p-4 text-sm text-[#dc2626]">
-                <span className="font-medium">Error:</span> {generateError}
-              </div>
-            )}
-          </div>
-        )}
-
-        {currentStep === 4 && (
-          <div className="space-y-8">
-            <div className="text-center">
-              <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-xl bg-[#10b981]/10">
-                <FileText className="h-7 w-7 text-[#10b981]" />
-              </div>
-              <h2 className="mb-3 text-2xl font-semibold tracking-tight text-[#111827]">
-                Your PRD is Ready!
-              </h2>
-              <p className="text-[#6b7280]">
-                Here&apos;s your generated Product Requirements Document. You
-                can download it, copy it, or view in full page mode.
-              </p>
-            </div>
-
-            {isGenerating ? (
-              <div className="flex justify-center py-16">
-                <Loader />
-              </div>
-            ) : (
-              <PRDDisplay
-                content={generatedPrd}
-                productName={prdInput.productName || 'PRD'}
-                prdInputs={prdInput}
-                model={selectedModel}
-                onFullPageView={handleFullPageView}
-              />
-            )}
-          </div>
-        )}
+          )}{' '}
+        </div>
       </div>
     </div>
   );
