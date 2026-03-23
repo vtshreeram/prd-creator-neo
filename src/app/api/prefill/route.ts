@@ -81,6 +81,8 @@ Return the response as a JSON object that strictly adheres to the provided schem
             futureFeatures: { type: Type.STRING },
             techStack: { type: Type.STRING },
             constraints: { type: Type.STRING },
+            timeline: { type: Type.STRING },
+            budget: { type: Type.STRING },
             currentState: { type: Type.STRING },
             proposedChanges: { type: Type.STRING }
           },
@@ -120,6 +122,8 @@ Return the response as a JSON object that strictly adheres to the provided schem
       futureFeatures: parsed.futureFeatures || DEFAULT_PRD_INPUT.futureFeatures,
       techStack: parsed.techStack || DEFAULT_PRD_INPUT.techStack,
       constraints: parsed.constraints || DEFAULT_PRD_INPUT.constraints,
+      timeline: parsed.timeline || '',
+      budget: parsed.budget || '',
       productMode:
         (productMode as PrdInput['productMode']) ||
         DEFAULT_PRD_INPUT.productMode,

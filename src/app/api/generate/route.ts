@@ -22,6 +22,8 @@ function validateInputs(value: unknown): value is PrdInput {
     'futureFeatures',
     'techStack',
     'constraints',
+    'timeline',
+    'budget',
     'productMode'
   ];
 

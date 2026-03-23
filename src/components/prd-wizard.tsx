@@ -11,7 +11,8 @@ import {
   Cloud,
   Bot,
   Smartphone,
-  Wand2
+  Wand2,
+  CheckCircle2
 } from 'lucide-react';
 import { PrdInput, DEFAULT_PRD_INPUT, ImageAttachment } from '@/lib/prd';
 import { Button } from './button';
@@ -354,15 +355,15 @@ ${clarificationQuestions
                           : 'cursor-not-allowed text-gray-400'
                   }`}
                 >
-                  <Icon
-                    className={`h-5 w-5 flex-shrink-0 ${
-                      isActive
-                        ? 'text-blue-600'
-                        : isCompleted
-                          ? 'text-green-500'
-                          : 'text-gray-400'
-                    }`}
-                  />
+                  {isCompleted ? (
+                    <CheckCircle2 className="h-5 w-5 flex-shrink-0 text-green-500" />
+                  ) : (
+                    <Icon
+                      className={`h-5 w-5 flex-shrink-0 ${
+                        isActive ? 'text-blue-600' : 'text-gray-400'
+                      }`}
+                    />
+                  )}
                   <span className="flex-1 truncate">{step.title}</span>
                 </button>
               );
@@ -555,23 +556,24 @@ ${clarificationQuestions
                 </div>
               )}
 
-              <div className="mt-8 flex flex-col-reverse justify-end gap-3 border-t border-gray-100 pt-6 sm:flex-row">
-                <Button
-                  variant="ghost"
-                  onClick={handleClarificationSubmit}
-                  disabled={isPrefilling}
-                  className="sm:w-auto"
-                >
-                  Skip Questions
-                </Button>
+              <div className="mt-8 flex flex-col justify-between gap-3 border-t border-gray-100 pt-6 sm:flex-row">
                 <Button
                   onClick={handleClarificationSubmit}
                   isLoading={isPrefilling}
                   disabled={isPrefilling}
+                  variant="outline"
+                  className="sm:w-auto"
+                >
+                  <Sparkles className="mr-2 h-4 w-4" /> Auto-fill Answers
+                </Button>
+                
+                <Button
+                  onClick={() => setCurrentStep(3)}
+                  disabled={isPrefilling}
                   variant="primary"
                   className="px-8 sm:w-auto"
                 >
-                  Submit & Auto-fill PRD <ArrowRight className="ml-2 h-4 w-4" />
+                  Submit & Continue <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </div>
             </div>
@@ -677,8 +679,33 @@ ${clarificationQuestions
                     description="Define specific, measurable KPIs and targets to track product success (e.g., User retention > 40%, 10k MAU in 6 months)."
                   />
                 </div>
-              </div>
 
+                <div className="space-y-6">
+                  <TextareaField
+                    label="Timeline & Milestones"
+                    id="timeline"
+                    name="timeline"
+                    value={prdInput.timeline}
+                    onChange={handleChange}
+                    placeholder="What is the expected timeline for this project?"
+                    rows={4}
+                    description="Outline key phases, milestones, or target launch dates."
+                  />
+                </div>
+
+                <div className="space-y-6">
+                  <TextareaField
+                    label="Budget & Resources"
+                    id="budget"
+                    name="budget"
+                    value={prdInput.budget}
+                    onChange={handleChange}
+                    placeholder="What is the budget or resource allocation?"
+                    rows={4}
+                    description="Specify team size, financial constraints, or required resources."
+                  />
+                </div>
+              </div>
               {generateError && (
                 <div className="rounded-lg bg-[#fef2f2] p-4 text-sm text-[#dc2626]">
                   <span className="font-medium">Error:</span> {generateError}
@@ -699,18 +726,32 @@ ${clarificationQuestions
             </div>
           )}
           {currentStep === 4 && (
-            <div className="space-y-8">
-              <div className="text-center">
-                <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-xl bg-[#10b981]/10">
-                  <FileText className="h-7 w-7 text-[#10b981]" />
+            <div className="space-y-4">
+              <div className="flex flex-col justify-between gap-4 border-b border-gray-100 pb-4 sm:flex-row sm:items-center">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-50">
+                    <FileText className="h-5 w-5 text-green-600" />
+                  </div>
+                  <div>
+                    <h2 className="text-lg font-semibold tracking-tight text-gray-900">
+                      Your PRD is Ready!
+                    </h2>
+                    <p className="text-sm text-gray-500">
+                      Review, save, or download your document below.
+                    </p>
+                  </div>
                 </div>
-                <h2 className="mb-3 text-2xl font-semibold tracking-tight text-[#111827]">
-                  Your PRD is Ready!
-                </h2>
-                <p className="text-[#6b7280]">
-                  Here&apos;s your generated Product Requirements Document. You
-                  can download it, copy it, or view in full page mode.
-                </p>
+                {!isGenerating && (
+                  <Button
+                    onClick={handleFinish}
+                    variant="outline"
+                    size="sm"
+                    className="w-full text-gray-600 sm:w-auto"
+                  >
+                    <Sparkles className="mr-2 h-4 w-4" />
+                    New Idea
+                  </Button>
+                )}
               </div>
 
               {isGenerating ? (
@@ -725,19 +766,6 @@ ${clarificationQuestions
                   model={selectedModel}
                   onFullPageView={handleFullPageView}
                 />
-              )}
-
-              {!isGenerating && (
-                <div className="mt-8 flex justify-center border-t border-gray-100 pt-6">
-                  <Button
-                    onClick={handleFinish}
-                    variant="outline"
-                    className="px-8 text-gray-600"
-                  >
-                    <Sparkles className="mr-2 h-4 w-4" />
-                    Start New Product Idea
-                  </Button>
-                </div>
               )}
             </div>
           )}{' '}

@@ -39,31 +39,45 @@ interface Heading {
 // Map markdown heading text to SECTION_FIELD_MAPPING keys
 const headingToSectionKey = (text: string): string | undefined => {
   const normalized = text.toLowerCase();
-  if (
-    normalized.includes('introduction') ||
-    normalized.includes('vision') ||
-    normalized.includes('problem')
-  )
+
+  // 1. Core Idea bucket
+  if (/(executive|overview|mission|problem|solution)/i.test(normalized))
     return '1. Core Product Idea';
+
+  // 2. Enhancement bucket (if applicable)
   if (
-    normalized.includes('audience') ||
-    normalized.includes('persona') ||
-    normalized.includes('market')
+    /(enhancement|before|after|current state|proposed change)/i.test(normalized)
   )
-    return '2. Audience & Market';
+    return '2. Enhancement Scope';
+
+  // 3. Audience & Market bucket
+  if (/(goal|objective|success|audience|user|persona)/i.test(normalized))
+    return '3. Audience & Market';
+
+  // 4. Features bucket
   if (
-    normalized.includes('feature') ||
-    normalized.includes('requirement') ||
-    normalized.includes('scope')
+    /(scope|story|use case|functional|tool|feature|ui|ux|design)/i.test(
+      normalized
+    )
   )
-    return '3. Features & Scope';
+    return '4. Features & Scope';
+
+  // 5. Technical bucket
   if (
-    normalized.includes('technical') ||
-    normalized.includes('consideration') ||
-    normalized.includes('constraint') ||
-    normalized.includes('stack')
+    /(technical|tech stack|architecture|system|data|api|security|performance|scalability|testing|deploy|monitor|maintenance)/i.test(
+      normalized
+    )
   )
-    return '4. Technical Details (Optional)';
+    return '5. Technical Details';
+
+  // 6. Planning bucket
+  if (
+    /(document|timeline|milestone|phase|budget|resource|risk|mitigation|future|roadmap)/i.test(
+      normalized
+    )
+  )
+    return '6. Planning & Execution';
+
   return undefined;
 };
 
