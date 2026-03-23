@@ -243,21 +243,7 @@ The system consists of the following major components:
 - UI styling libraries for compact Neo-Brutalism design
 - Lucide React icons for interface elements (must use Lucide icons throughout the application code)
 
-#### 4.1.7 PWAInstallPrompt Component (src/components/pwa-install-prompt.tsx)
-
-**Responsibilities:**
-
-- Detect PWA installation eligibility
-- Display install prompt to users
-- Handle PWA installation process
-- Store installation preference
-
-**Dependencies:**
-
-- PWA installation APIs
-- Local storage for preferences
-
-#### 4.1.8 FullPagePRDViewer Component (src/components/full-page-prd-viewer.tsx)
+#### 4.1.7 FullPagePRDViewer Component (src/components/full-page-prd-viewer.tsx)
 
 **Responsibilities:**
 

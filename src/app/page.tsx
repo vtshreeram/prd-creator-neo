@@ -3,11 +3,9 @@
 import React, { useState, useEffect } from 'react';
 import { PrdInput, DEFAULT_PRD_INPUT } from '@/lib/prd';
 import { Header } from '@/components/header';
-import { Footer } from '@/components/footer';
 import { PRDWizard } from '@/components/prd-wizard';
 import { FullPagePRDViewer } from '@/components/full-page-prd-viewer';
 import { SettingsModal } from '@/components/settings-modal';
-import { PWAInstallPrompt } from '@/components/pwa-install-prompt';
 import { SavedDraftsModal } from '@/components/saved-drafts-modal';
 import { StoredDraft } from '@/lib/drafts';
 
@@ -165,23 +163,18 @@ export default function Home() {
               onFullPageView={handleFullPageView}
               onResetState={handleResetState}
             />
-          </div>
-        </div>
-      </main>
+            </div>
+            </div>
+            </main>
 
-      <Footer />
-
-      {/* Modals */}
-      <SettingsModal
+            {/* Settings Modal */}
+            <SettingsModal
         isOpen={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}
         onSave={handleSaveSettings}
         currentApiKey={apiKey}
         currentModel={selectedModel}
       />
-
-      {/* PWA Install Prompt */}
-      <PWAInstallPrompt />
 
       {/* Saved Drafts Modal */}
       <SavedDraftsModal
