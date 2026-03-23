@@ -71,6 +71,7 @@ export function PRDWizard({
   const [userClarificationAnswers, setUserClarificationAnswers] = useState<
     string[]
   >([]);
+  const [isAutoFilling, setIsAutoFilling] = useState<boolean>(false);
   const [isClarifying, setIsClarifying] = useState<boolean>(false);
   const [isPrefilling, setIsPrefilling] = useState<boolean>(false);
   const [prefillError, setPrefillError] = useState<string>('');
@@ -155,7 +156,44 @@ export function PRDWizard({
     }
   };
 
-  const handleClarificationSubmit = async () => {
+  const handleAutoFillAnswers = async () => {
+    setIsAutoFilling(true);
+    setPrefillError('');
+
+    try {
+      const response = await fetch('/api/autofill-answers', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          productIdea,
+          questions: clarificationQuestions,
+          productMode: prdInput.productMode,
+          apiKey,
+          model: selectedModel
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to auto-fill answers');
+      }
+
+      const { data } = await response.json();
+      setUserClarificationAnswers(data);
+    } catch (err) {
+      setPrefillError(
+        err instanceof Error
+          ? err.message
+          : 'An error occurred while auto-filling answers.'
+      );
+    } finally {
+      setIsAutoFilling(false);
+    }
+  };
+
+  const handleContinueToReview = async () => {
     setIsPrefilling(true);
     setPrefillError('');
 
@@ -391,18 +429,19 @@ ${clarificationQuestions
       <div className="flex min-w-0 flex-1 flex-col">
         <div className="min-h-[500px] rounded-xl border border-gray-200 bg-white p-6 shadow-sm sm:p-10">
           {currentStep === 1 && (
-            <div className="mx-auto max-w-3xl space-y-8">
-              <div className="text-center">
-                <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-xl bg-[#6366f1]/10">
-                  <Sparkles className="h-7 w-7 text-[#6366f1]" />
+            <div className="space-y-8">
+              <div className="flex items-center gap-3 border-b border-gray-100 pb-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50">
+                  <Sparkles className="h-5 w-5 text-blue-600" />
                 </div>
-                <h2 className="mb-3 text-2xl font-semibold tracking-tight text-[#111827]">
-                  What&apos;s Your Product Idea?
-                </h2>
-                <p className="text-[#6b7280]">
-                  Tell us about your product in a few sentences, and we&apos;ll
-                  help you build a comprehensive PRD.
-                </p>
+                <div>
+                  <h2 className="text-lg font-semibold tracking-tight text-gray-900">
+                    Product Idea
+                  </h2>
+                  <p className="text-sm text-gray-500">
+                    Tell us about your product in a few sentences.
+                  </p>
+                </div>
               </div>
 
               <div className="space-y-8 text-left">
@@ -507,18 +546,19 @@ ${clarificationQuestions
             </div>
           )}
           {currentStep === 2 && (
-            <div className="mx-auto max-w-3xl space-y-8">
-              <div className="text-center">
-                <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-xl bg-[#8b5cf6]/10">
-                  <MessageSquare className="h-7 w-7 text-[#8b5cf6]" />
+            <div className="space-y-8">
+              <div className="flex items-center gap-3 border-b border-gray-100 pb-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-50">
+                  <MessageSquare className="h-5 w-5 text-purple-600" />
                 </div>
-                <h2 className="mb-3 text-2xl font-semibold tracking-tight text-[#111827]">
-                  Let&apos;s Clarify a Few Things
-                </h2>
-                <p className="text-[#6b7280]">
-                  Based on your idea, our AI strategist has identified a few
-                  areas to dive deeper into.
-                </p>
+                <div>
+                  <h2 className="text-lg font-semibold tracking-tight text-gray-900">
+                    Clarification
+                  </h2>
+                  <p className="text-sm text-gray-500">
+                    Answer these questions to improve your PRD.
+                  </p>
+                </div>
               </div>
 
               <div className="space-y-6 text-left">
@@ -556,154 +596,194 @@ ${clarificationQuestions
                 </div>
               )}
 
-              <div className="mt-8 flex flex-col justify-between gap-3 border-t border-gray-100 pt-6 sm:flex-row">
+              <div className="mt-8 flex flex-col justify-between gap-4 border-t border-gray-100 pt-6 sm:flex-row sm:items-center">
                 <Button
-                  onClick={handleClarificationSubmit}
-                  isLoading={isPrefilling}
-                  disabled={isPrefilling}
-                  variant="outline"
-                  className="sm:w-auto"
+                  onClick={() => setCurrentStep(1)}
+                  variant="ghost"
+                  className="order-3 text-gray-600 sm:order-1 sm:w-auto"
                 >
-                  <Sparkles className="mr-2 h-4 w-4" /> Auto-fill Answers
+                  Back
                 </Button>
-                
-                <Button
-                  onClick={() => setCurrentStep(3)}
-                  disabled={isPrefilling}
-                  variant="primary"
-                  className="px-8 sm:w-auto"
-                >
-                  Submit & Continue <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
+
+                <div className="order-1 flex flex-col gap-3 sm:order-2 sm:flex-row sm:gap-4">
+                  <Button
+                    onClick={handleAutoFillAnswers}
+                    isLoading={isAutoFilling}
+                    disabled={isAutoFilling || isPrefilling}
+                    variant="outline"
+                    className="sm:w-auto"
+                  >
+                    <Sparkles className="mr-2 h-4 w-4" /> Auto-fill Answers
+                  </Button>
+
+                  <Button
+                    onClick={handleContinueToReview}
+                    isLoading={isPrefilling}
+                    disabled={isPrefilling || isAutoFilling}
+                    variant="primary"
+                    className="px-8 sm:w-auto"
+                  >
+                    Submit & Continue <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             </div>
           )}
           {currentStep === 3 && (
-            <div className="mx-auto max-w-4xl space-y-8">
-              <div className="text-center">
-                <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-xl bg-[#06b6d4]/10">
-                  <Edit3 className="h-7 w-7 text-[#06b6d4]" />
+            <div className="space-y-8">
+              <div className="flex items-center gap-3 border-b border-gray-100 pb-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-cyan-50">
+                  <Edit3 className="h-5 w-5 text-cyan-600" />
                 </div>
-                <h2 className="mb-3 text-2xl font-semibold tracking-tight text-[#111827]">
-                  Review & Customize Details
-                </h2>
-                <p className="text-[#6b7280]">
-                  We&apos;ve pre-filled your PRD based on your idea and answers.
-                  Review and edit any section as needed.
-                </p>
+                <div>
+                  <h2 className="text-lg font-semibold tracking-tight text-gray-900">
+                    Review Details
+                  </h2>
+                  <p className="text-sm text-gray-500">
+                    Edit the pre-filled information before generating the
+                    document.
+                  </p>
+                </div>
               </div>
 
-              <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
-                <div className="space-y-5">
-                  <div>
-                    <label className="mb-1.5 block text-sm font-medium text-[#374151]">
-                      Product Name
-                    </label>
-                    <input
-                      type="text"
-                      id="productName"
-                      name="productName"
-                      value={prdInput.productName}
+              <div className="space-y-8">
+                {/* Card 1: Core Concept */}
+                <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+                  <div className="border-b border-gray-100 bg-gray-50/80 px-6 py-4">
+                    <h3 className="flex items-center gap-2 font-semibold text-gray-900">
+                      <Sparkles className="h-5 w-5 text-blue-600" />
+                      Core Concept
+                    </h3>
+                  </div>
+                  <div className="space-y-6 p-6">
+                    <div>
+                      <label className="mb-2 block text-[15px] font-semibold text-gray-900">
+                        Product Name
+                      </label>
+                      <input
+                        type="text"
+                        id="productName"
+                        name="productName"
+                        value={prdInput.productName}
+                        onChange={handleChange}
+                        className="flex h-12 w-full rounded-xl border border-gray-300 bg-white px-4 py-2 text-[15px] text-gray-900 shadow-sm transition-all placeholder:text-gray-400 hover:border-gray-400 focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10 focus:outline-none"
+                        placeholder="e.g., Apollo - The AI Trip Planner"
+                      />
+                    </div>
+                    <TextareaField
+                      label="Problem Statement"
+                      id="problemStatement"
+                      name="problemStatement"
+                      value={prdInput.problemStatement}
                       onChange={handleChange}
-                      className="flex h-11 w-full rounded-lg border border-[#e5e7eb] bg-white px-4 py-2.5 text-sm placeholder:text-[#d1d5db] focus:border-[#06b6d4] focus:ring-2 focus:ring-[#06b6d4]/20 focus:outline-none"
-                      placeholder="e.g., Apollo - The AI Trip Planner"
+                      placeholder="What problem does your product solve?"
+                      rows={4}
+                    />
+                    <TextareaField
+                      label="Proposed Solution"
+                      id="proposedSolution"
+                      name="proposedSolution"
+                      value={prdInput.proposedSolution}
+                      onChange={handleChange}
+                      placeholder="How does your product solve this problem?"
+                      rows={4}
                     />
                   </div>
-
-                  <TextareaField
-                    label="Problem Statement"
-                    id="problemStatement"
-                    name="problemStatement"
-                    value={prdInput.problemStatement}
-                    onChange={handleChange}
-                    placeholder="What problem does your product solve?"
-                    rows={6}
-                  />
                 </div>
 
-                <div className="space-y-5">
-                  <TextareaField
-                    label="Target Audience"
-                    id="targetAudience"
-                    name="targetAudience"
-                    value={prdInput.targetAudience}
-                    onChange={handleChange}
-                    placeholder="Who are your target users?"
-                    rows={6}
-                  />
-
-                  {prdInput.productMode === 'Feature Enhancement' ? (
-                    <>
-                      <TextareaField
-                        label="Current State (Before)"
-                        id="currentState"
-                        name="currentState"
-                        value={prdInput.currentState}
-                        onChange={handleChange}
-                        placeholder="Describe the current implementation or feature set..."
-                        rows={4}
-                      />
-                      <TextareaField
-                        label="Proposed Changes (After)"
-                        id="proposedChanges"
-                        name="proposedChanges"
-                        value={prdInput.proposedChanges}
-                        onChange={handleChange}
-                        placeholder="Describe the specific enhancements or changes..."
-                        rows={4}
-                      />
-                    </>
-                  ) : (
+                {/* Card 2: Market & Features */}
+                <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+                  <div className="border-b border-gray-100 bg-gray-50/80 px-6 py-4">
+                    <h3 className="flex items-center gap-2 font-semibold text-gray-900">
+                      <Cloud className="h-5 w-5 text-blue-600" />
+                      Market & Features
+                    </h3>
+                  </div>
+                  <div className="space-y-6 p-6">
                     <TextareaField
-                      label="Key Features"
-                      id="keyFeatures"
-                      name="keyFeatures"
-                      value={prdInput.keyFeatures}
+                      label="Target Audience"
+                      id="targetAudience"
+                      name="targetAudience"
+                      value={prdInput.targetAudience}
                       onChange={handleChange}
-                      placeholder="What are the main features that differentiate your product?"
-                      rows={6}
-                      description="List the key differentiating features that make your product unique and valuable."
+                      placeholder="Who are your target users?"
+                      rows={4}
                     />
-                  )}
+
+                    {prdInput.productMode === 'Feature Enhancement' ? (
+                      <div className="space-y-6">
+                        <TextareaField
+                          label="Current State (Before)"
+                          id="currentState"
+                          name="currentState"
+                          value={prdInput.currentState}
+                          onChange={handleChange}
+                          placeholder="Describe the current implementation or feature set..."
+                          rows={4}
+                        />
+                        <TextareaField
+                          label="Proposed Changes (After)"
+                          id="proposedChanges"
+                          name="proposedChanges"
+                          value={prdInput.proposedChanges}
+                          onChange={handleChange}
+                          placeholder="Describe the specific enhancements or changes..."
+                          rows={4}
+                        />
+                      </div>
+                    ) : (
+                      <TextareaField
+                        label="Key Features & Differentiators"
+                        id="keyFeatures"
+                        name="keyFeatures"
+                        value={prdInput.keyFeatures}
+                        onChange={handleChange}
+                        placeholder="What are the main features that differentiate your product?"
+                        rows={6}
+                        description="List the key differentiating features that make your product unique and valuable."
+                      />
+                    )}
+                  </div>
                 </div>
 
-                <div className="md:col-span-2">
-                  <TextareaField
-                    label="Success Metrics"
-                    id="successMetrics"
-                    name="successMetrics"
-                    value={prdInput.successMetrics}
-                    onChange={handleChange}
-                    placeholder="How will you measure success?"
-                    rows={4}
-                    description="Define specific, measurable KPIs and targets to track product success (e.g., User retention > 40%, 10k MAU in 6 months)."
-                  />
-                </div>
-
-                <div className="space-y-6">
-                  <TextareaField
-                    label="Timeline & Milestones"
-                    id="timeline"
-                    name="timeline"
-                    value={prdInput.timeline}
-                    onChange={handleChange}
-                    placeholder="What is the expected timeline for this project?"
-                    rows={4}
-                    description="Outline key phases, milestones, or target launch dates."
-                  />
-                </div>
-
-                <div className="space-y-6">
-                  <TextareaField
-                    label="Budget & Resources"
-                    id="budget"
-                    name="budget"
-                    value={prdInput.budget}
-                    onChange={handleChange}
-                    placeholder="What is the budget or resource allocation?"
-                    rows={4}
-                    description="Specify team size, financial constraints, or required resources."
-                  />
+                {/* Card 3: Execution & Planning */}
+                <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+                  <div className="border-b border-gray-100 bg-gray-50/80 px-6 py-4">
+                    <h3 className="flex items-center gap-2 font-semibold text-gray-900">
+                      <ArrowRight className="h-5 w-5 text-blue-600" />
+                      Execution & Planning
+                    </h3>
+                  </div>
+                  <div className="space-y-6 p-6">
+                    <TextareaField
+                      label="Success Metrics"
+                      id="successMetrics"
+                      name="successMetrics"
+                      value={prdInput.successMetrics}
+                      onChange={handleChange}
+                      placeholder="How will you measure success?"
+                      rows={4}
+                      description="Define specific, measurable KPIs and targets to track product success."
+                    />
+                    <TextareaField
+                      label="Timeline & Milestones"
+                      id="timeline"
+                      name="timeline"
+                      value={prdInput.timeline}
+                      onChange={handleChange}
+                      placeholder="What is the expected timeline for this project?"
+                      rows={3}
+                    />
+                    <TextareaField
+                      label="Budget & Resources"
+                      id="budget"
+                      name="budget"
+                      value={prdInput.budget}
+                      onChange={handleChange}
+                      placeholder="What is the budget or resource allocation?"
+                      rows={3}
+                    />
+                  </div>
                 </div>
               </div>
               {generateError && (
@@ -712,7 +792,14 @@ ${clarificationQuestions
                 </div>
               )}
 
-              <div className="mt-8 flex justify-end border-t border-gray-100 pt-6">
+              <div className="mt-8 flex flex-col justify-between gap-4 border-t border-gray-100 pt-6 sm:flex-row sm:items-center">
+                <Button
+                  onClick={() => setCurrentStep(2)}
+                  variant="ghost"
+                  className="text-gray-600 sm:w-auto"
+                >
+                  Back
+                </Button>
                 <Button
                   onClick={handleGeneratePRD}
                   disabled={!canGoToStep4 || isGenerating}
