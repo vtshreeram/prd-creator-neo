@@ -2,25 +2,26 @@
 
 ## 🚀 Project Overview
 
-**AI PRD Creator** is an intelligent web application built to generate Product Requirements Documents (PRDs) from simple ideas using Google's Gemini AI. It provides a guided, wizard-based interface for users to enter requirements and outputs comprehensive, professional PRDs.
+**AI PRD Creator** is an intelligent web application built to generate highly detailed, 29-module Product Requirements Documents (PRDs) from simple ideas using Google's Gemini AI. It provides a guided, fluid-layout workspace for users to enter requirements, answer clarification questions, and output professional PRDs suitable for immediate engineering handoff.
 
 ### 🛠️ Core Technologies
 
 - **Framework:** Next.js (App Router)
 - **Language:** TypeScript
-- **Styling:** Tailwind CSS (v4) leveraging a "Compact Neo-Brutalism" design system
+- **Styling:** Tailwind CSS (v4) utilizing a clean, minimalist `shadcn/ui` inspired design system.
 - **AI Integration:** Google Gemini API (`@google/genai`)
 - **UI Components:** Radix UI primitives and Lucide React icons
-- **State/Storage:** IndexedDB (`idb` library) for draft management; localStorage for API keys
-- **PWA:** Fully offline-capable Progressive Web App using `next-pwa`
+- **State/Storage:** IndexedDB (`idb` library) for robust draft management; `localStorage` for API keys.
+- **Export Formats:** Markdown, PDF (`window.print()`), and Word Docs (`docx` library).
 
 ## 🏗️ Architecture & Data Flow
 
 - **Client-Side Storage Approach:** API keys are provided by the user in the browser UI, stored locally via `localStorage`, and passed securely in request payloads to the Next.js API routes (`src/app/api/*`). There is strictly no server-side key logging or backend environment variable requirement.
+- **Workspace Layout:** The main interaction occurs in `src/components/prd-wizard.tsx`, which uses a fluid two-column layout (Left Sidebar for navigation, Right Panel for active forms/content).
 - **App Structure:** Standard App Router layout.
-  - `src/app/api`: Contains endpoints for fetching models (`/models`), prefilling forms (`/prefill`), generating PRDs (`/generate`), and refining sections (`/refine`).
-  - `src/components`: UI elements, form widgets, modals, and PRD display viewers.
-  - `src/lib`: Core logic including the Gemini client wrappers, prompt builders (`prompt.ts`), PRD interfaces (`prd.ts`), and draft management (`drafts.ts`).
+  - `src/app/api`: Contains endpoints for fetching models (`/models`), generating clarification questions (`/clarify`), auto-filling answers (`/autofill-answers`), prefilling forms (`/prefill`), generating full PRDs (`/generate`), refining specific sections (`/refine`), and full-document AI chat editing (`/chat`).
+  - `src/components`: UI elements, form widgets, modals, and the comprehensive PRD workspace viewer (`full-page-prd-viewer.tsx`).
+  - `src/lib`: Core logic including Gemini client wrappers, prompt builders (`prompt.ts`), 29-module PRD interface schemas (`prd.ts`), draft management (`drafts.ts`), and document export utilities (`export.ts`).
 
 ## 💻 Building and Running
 
@@ -56,8 +57,8 @@ Use `npm` for dependency management and script execution.
 ## 📐 Development Conventions
 
 - **TypeScript:** Strict mode is enabled. Use robust typing for all API inputs/outputs and component props.
-- **Component Design:** Components should follow a highly functional, accessible approach using Radix UI primitives. Maintain the Neo-Brutalism aesthetic (defined in `src/app/globals.css` and Tailwind classes).
-- **Styling:** Utilize Tailwind v4 utility classes. Avoid excessive custom CSS unless defining critical CSS variables or design system patterns.
+- **Component Design:** Components follow a clean, minimalist `shadcn/ui` aesthetic (rounded corners, subtle borders, soft shadows, readable typography). Do not introduce heavy, brutalist, or neon designs. 
+- **Styling:** Utilize Tailwind v4 utility classes combined with `clsx` and `tailwind-merge` in the `cn()` utility (`src/lib/utils.ts`) for flexible class composition.
 - **Routing:** Adhere strictly to the Next.js App Router paradigm (`page.tsx`, `layout.tsx`, `route.ts`).
-- **AI Prompts:** When modifying prompt engineering files (e.g., `src/lib/prompt.ts`, `src/app/api/prefill/route.ts`), ensure JSON schemas remain strongly typed and resilient. Always maintain the inclusion of the current date/time context.
+- **AI Prompts:** When modifying prompt engineering files (e.g., `src/lib/prd.ts`, `src/app/api/chat/route.ts`), ensure JSON schemas remain strongly typed and resilient. The system relies on strict structural compliance (e.g., the exact 29-module markdown headers).
 - **Formatting:** Use Prettier to keep code styling consistent across `.ts`, `.tsx`, and `.css` files. Ensure you run `npm run format` before finalizing commits.
