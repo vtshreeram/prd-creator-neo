@@ -12,7 +12,11 @@ import {
   Bot,
   Smartphone,
   Wand2,
-  CheckCircle2
+  CheckCircle2,
+  Users,
+  LayoutList,
+  Code,
+  CalendarDays
 } from 'lucide-react';
 import { PrdInput, DEFAULT_PRD_INPUT, ImageAttachment } from '@/lib/prd';
 import { Button } from './button';
@@ -691,12 +695,12 @@ ${clarificationQuestions
                   </div>
                 </div>
 
-                {/* Card 2: Market & Features */}
+                {/* Card 2: Market & Goals */}
                 <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
                   <div className="border-b border-gray-100 bg-gray-50/80 px-6 py-4">
                     <h3 className="flex items-center gap-2 font-semibold text-gray-900">
-                      <Cloud className="h-5 w-5 text-blue-600" />
-                      Market & Features
+                      <Users className="h-5 w-5 text-blue-600" />
+                      Audience & Goals
                     </h3>
                   </div>
                   <div className="space-y-6 p-6">
@@ -709,9 +713,39 @@ ${clarificationQuestions
                       placeholder="Who are your target users?"
                       rows={4}
                     />
+                    <TextareaField
+                      label="Business Goals"
+                      id="businessGoals"
+                      name="businessGoals"
+                      value={prdInput.businessGoals}
+                      onChange={handleChange}
+                      placeholder="What are the key business objectives?"
+                      rows={4}
+                    />
+                    <TextareaField
+                      label="Success Metrics"
+                      id="successMetrics"
+                      name="successMetrics"
+                      value={prdInput.successMetrics}
+                      onChange={handleChange}
+                      placeholder="How will you measure success?"
+                      rows={4}
+                      description="Define specific, measurable KPIs and targets to track product success."
+                    />
+                  </div>
+                </div>
 
+                {/* Card 3: Features & Scope */}
+                <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+                  <div className="border-b border-gray-100 bg-gray-50/80 px-6 py-4">
+                    <h3 className="flex items-center gap-2 font-semibold text-gray-900">
+                      <LayoutList className="h-5 w-5 text-blue-600" />
+                      Features & Scope
+                    </h3>
+                  </div>
+                  <div className="space-y-6 p-6">
                     {prdInput.productMode === 'Feature Enhancement' ? (
-                      <div className="space-y-6">
+                      <>
                         <TextareaField
                           label="Current State (Before)"
                           id="currentState"
@@ -730,59 +764,100 @@ ${clarificationQuestions
                           placeholder="Describe the specific enhancements or changes..."
                           rows={4}
                         />
-                      </div>
+                      </>
                     ) : (
-                      <TextareaField
-                        label="Key Features & Differentiators"
-                        id="keyFeatures"
-                        name="keyFeatures"
-                        value={prdInput.keyFeatures}
-                        onChange={handleChange}
-                        placeholder="What are the main features that differentiate your product?"
-                        rows={6}
-                        description="List the key differentiating features that make your product unique and valuable."
-                      />
+                      <>
+                        <TextareaField
+                          label="Core Features (MVP)"
+                          id="coreFeatures"
+                          name="coreFeatures"
+                          value={prdInput.coreFeatures}
+                          onChange={handleChange}
+                          placeholder="What are the absolute essential features for the first release?"
+                          rows={5}
+                        />
+                        <TextareaField
+                          label="Key Differentiators"
+                          id="keyFeatures"
+                          name="keyFeatures"
+                          value={prdInput.keyFeatures}
+                          onChange={handleChange}
+                          placeholder="What makes this product unique compared to competitors?"
+                          rows={4}
+                        />
+                        <TextareaField
+                          label="Future Features (Post-MVP)"
+                          id="futureFeatures"
+                          name="futureFeatures"
+                          value={prdInput.futureFeatures}
+                          onChange={handleChange}
+                          placeholder="What features are planned for later releases?"
+                          rows={4}
+                        />
+                      </>
                     )}
                   </div>
                 </div>
 
-                {/* Card 3: Execution & Planning */}
+                {/* Card 4: Technical & Constraints */}
                 <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
                   <div className="border-b border-gray-100 bg-gray-50/80 px-6 py-4">
                     <h3 className="flex items-center gap-2 font-semibold text-gray-900">
-                      <ArrowRight className="h-5 w-5 text-blue-600" />
-                      Execution & Planning
+                      <Code className="h-5 w-5 text-blue-600" />
+                      Technical Details
                     </h3>
                   </div>
                   <div className="space-y-6 p-6">
                     <TextareaField
-                      label="Success Metrics"
-                      id="successMetrics"
-                      name="successMetrics"
-                      value={prdInput.successMetrics}
+                      label="Technology Stack"
+                      id="techStack"
+                      name="techStack"
+                      value={prdInput.techStack}
                       onChange={handleChange}
-                      placeholder="How will you measure success?"
+                      placeholder="What technologies, frameworks, or APIs will be used?"
                       rows={4}
-                      description="Define specific, measurable KPIs and targets to track product success."
                     />
                     <TextareaField
-                      label="Timeline & Milestones"
-                      id="timeline"
-                      name="timeline"
-                      value={prdInput.timeline}
+                      label="Constraints & Dependencies"
+                      id="constraints"
+                      name="constraints"
+                      value={prdInput.constraints}
                       onChange={handleChange}
-                      placeholder="What is the expected timeline for this project?"
-                      rows={3}
+                      placeholder="Are there any technical, legal, or resource constraints?"
+                      rows={4}
                     />
-                    <TextareaField
-                      label="Budget & Resources"
-                      id="budget"
-                      name="budget"
-                      value={prdInput.budget}
-                      onChange={handleChange}
-                      placeholder="What is the budget or resource allocation?"
-                      rows={3}
-                    />
+                  </div>
+                </div>
+
+                {/* Card 5: Execution & Planning */}
+                <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+                  <div className="border-b border-gray-100 bg-gray-50/80 px-6 py-4">
+                    <h3 className="flex items-center gap-2 font-semibold text-gray-900">
+                      <CalendarDays className="h-5 w-5 text-blue-600" />
+                      Execution & Planning
+                    </h3>
+                  </div>
+                  <div className="space-y-6 p-6">
+                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                      <TextareaField
+                        label="Timeline & Milestones"
+                        id="timeline"
+                        name="timeline"
+                        value={prdInput.timeline}
+                        onChange={handleChange}
+                        placeholder="Expected timeline, phases, or target launch dates?"
+                        rows={4}
+                      />
+                      <TextareaField
+                        label="Budget & Resources"
+                        id="budget"
+                        name="budget"
+                        value={prdInput.budget}
+                        onChange={handleChange}
+                        placeholder="Team size, budget, or other required resources?"
+                        rows={4}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>

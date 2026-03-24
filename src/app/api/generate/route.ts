@@ -2,49 +2,36 @@ import { NextRequest, NextResponse } from 'next/server';
 import { buildGenerationPrompt, PrdInput } from '../../../lib/prd';
 import { GoogleGenAI } from '@google/genai';
 import { getContextHeader } from '../_lib/datetime';
+import { z } from 'zod';
 
-function validateInputs(value: unknown): value is PrdInput {
-  if (!value || typeof value !== 'object') {
-    return false;
-  }
-  const input = value as Record<keyof PrdInput, unknown>;
-
-  // Check string fields
-  const stringFields: Array<keyof PrdInput> = [
-    'productName',
-    'targetAudience',
-    'problemStatement',
-    'proposedSolution',
-    'coreFeatures',
-    'keyFeatures',
-    'businessGoals',
-    'successMetrics',
-    'futureFeatures',
-    'techStack',
-    'constraints',
-    'timeline',
-    'budget',
-    'productMode'
-  ];
-
-  const stringFieldsValid = stringFields.every(
-    (field) => typeof input[field] === 'string'
-  );
-
-  // Check productIdeaImages field (optional)
-  const imagesValid =
-    !input.productIdeaImages || Array.isArray(input.productIdeaImages);
-
-  return stringFieldsValid && imagesValid;
-}
+const prdInputSchema = z.object({
+  productName: z.string(),
+  targetAudience: z.string(),
+  problemStatement: z.string(),
+  proposedSolution: z.string(),
+  coreFeatures: z.string(),
+  keyFeatures: z.string(),
+  businessGoals: z.string(),
+  successMetrics: z.string(),
+  futureFeatures: z.string(),
+  techStack: z.string(),
+  constraints: z.string(),
+  timeline: z.string(),
+  budget: z.string(),
+  productMode: z.union([
+    z.literal('SaaS Product'),
+    z.literal('AI Product'),
+    z.literal('Mobile App'),
+    z.literal('Feature Enhancement')
+  ]).optional().default('SaaS Product'),
+  currentState: z.string().optional(),
+  proposedChanges: z.string().optional(),
+  productIdeaImages: z.array(z.any()).optional()
+});
 
 export async function POST(request: NextRequest) {
   try {
-    const { inputs, apiKey, model } = (await request.json()) as {
-      inputs?: unknown;
-      apiKey?: string;
-      model?: string;
-    };
+    const { inputs, apiKey, model } = await request.json();
 
     if (!apiKey || typeof apiKey !== 'string') {
       return NextResponse.json(
@@ -53,15 +40,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!validateInputs(inputs)) {
+    const parseResult = prdInputSchema.safeParse(inputs);
+    if (!parseResult.success) {
       return NextResponse.json(
-        { error: 'Invalid PRD inputs provided.' },
+        { error: 'Invalid PRD inputs provided.', details: parseResult.error.format() },
         { status: 400 }
       );
     }
 
     const client = new GoogleGenAI({ apiKey });
-    const basePrompt = buildGenerationPrompt(inputs);
+    const basePrompt = buildGenerationPrompt(parseResult.data as PrdInput);
 
     // Add current date/time context to the prompt
     const promptWithContext = getContextHeader() + basePrompt;

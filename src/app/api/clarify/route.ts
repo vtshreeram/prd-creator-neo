@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Type, GoogleGenAI } from '@google/genai';
 import { getContextHeader } from '../_lib/datetime';
+import { cleanJsonResponse } from '@/lib/utils';
 
 export async function POST(request: NextRequest) {
   try {
@@ -88,7 +89,7 @@ Return the response as a JSON object with a 'questions' array.`;
       );
     }
 
-    const parsed = JSON.parse(jsonString);
+    const parsed = JSON.parse(cleanJsonResponse(jsonString));
     return NextResponse.json({ data: parsed.questions || [] });
   } catch (error) {
     const message =

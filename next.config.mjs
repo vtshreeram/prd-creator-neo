@@ -55,11 +55,7 @@ const withPWA = withPWAInit({
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Ensure proper handling of CSS imports
-  webpack: (config) => {
-    // Important: return the modified config
-    return config;
-  }
+  turbopack: {}
 };
 
 export default withPWA(nextConfig);

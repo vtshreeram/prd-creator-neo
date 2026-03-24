@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { Type, GoogleGenAI } from '@google/genai';
 import { DEFAULT_PRD_INPUT, PrdInput } from '../../../lib/prd';
 import { getContextHeader } from '../_lib/datetime';
+import { cleanJsonResponse } from '@/lib/utils';
 
 export async function POST(request: NextRequest) {
   try {
@@ -107,7 +108,7 @@ Return the response as a JSON object that strictly adheres to the provided schem
       );
     }
 
-    const parsed = JSON.parse(jsonString);
+    const parsed = JSON.parse(cleanJsonResponse(jsonString));
     const result: PrdInput = {
       productName: parsed.productName || DEFAULT_PRD_INPUT.productName,
       targetAudience: parsed.targetAudience || DEFAULT_PRD_INPUT.targetAudience,

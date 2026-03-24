@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useRef } from 'react';
 import { MarkdownRenderer } from './markdown-renderer';
 import {
   X,
@@ -10,7 +10,12 @@ import {
   Wand2,
   ArrowRight,
   FileText,
-  FileDown
+  FileDown,
+  Pencil,
+  Save,
+  MessageSquare,
+  Send,
+  Loader2
 } from 'lucide-react';
 import { PrdInput } from '@/lib/prd';
 import { RefineModal } from './refine-modal';
@@ -34,6 +39,12 @@ interface Heading {
   text: string;
   level: number;
   sectionKey?: string;
+}
+
+interface ChatMessage {
+  id: string;
+  role: 'user' | 'ai';
+  content: string;
 }
 
 // Map markdown heading text to SECTION_FIELD_MAPPING keys
@@ -153,6 +164,17 @@ export function FullPagePRDViewer({
   const [activeHeading, setActiveHeading] = useState<string>('');
   const [isComparisonMode, setIsComparisonMode] = useState(false);
 
+  // Edit Mode State
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedContent, setEditedContent] = useState(content);
+
+  // Chat Mode State
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const [chatInput, setChatInput] = useState('');
+  const [isChatLoading, setIsChatLoading] = useState(false);
+  const chatScrollRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     if (productMode === 'Feature Enhancement') {
       setIsComparisonMode(true);
@@ -160,6 +182,17 @@ export function FullPagePRDViewer({
       setIsComparisonMode(false);
     }
   }, [productMode]);
+
+  useEffect(() => {
+    setEditedContent(content);
+  }, [content]);
+
+  // Scroll chat to bottom on new message
+  useEffect(() => {
+    if (chatScrollRef.current) {
+      chatScrollRef.current.scrollTop = chatScrollRef.current.scrollHeight;
+    }
+  }, [chatMessages]);
 
   // Refinement state
   const [isRefineModalOpen, setIsRefineModalOpen] = useState(false);
@@ -221,7 +254,7 @@ export function FullPagePRDViewer({
 
   // Observer for active heading
   useEffect(() => {
-    if (!isOpen || !content) return;
+    if (!isOpen || !content || isEditing) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -240,7 +273,71 @@ export function FullPagePRDViewer({
     headingElements.forEach((el) => observer.observe(el));
 
     return () => observer.disconnect();
-  }, [isOpen, content]);
+  }, [isOpen, content, isEditing]);
+
+  const handleSaveEdit = () => {
+    setIsEditing(false);
+    if (onUpdatePRD && prdInput) {
+      onUpdatePRD(editedContent, prdInput);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditedContent(content);
+    setIsEditing(false);
+  };
+
+  // Chat handling
+  const handleSendChatMessage = async () => {
+    if (!chatInput.trim() || !apiKey || !onUpdatePRD || !prdInput) return;
+
+    const userMsg: ChatMessage = {
+      id: Date.now().toString(),
+      role: 'user',
+      content: chatInput.trim()
+    };
+    const newMessages = [...chatMessages, userMsg];
+    setChatMessages(newMessages);
+    setChatInput('');
+    setIsChatLoading(true);
+
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: newMessages,
+          document: content,
+          apiKey,
+          model
+        })
+      });
+
+      if (!response.ok) throw new Error('Chat request failed');
+      const { data } = await response.json();
+
+      const aiMsg: ChatMessage = {
+        id: Date.now().toString(),
+        role: 'ai',
+        content: data.reply
+      };
+      setChatMessages((prev) => [...prev, aiMsg]);
+
+      if (data.updatedDocument) {
+        onUpdatePRD(data.updatedDocument, prdInput);
+        setEditedContent(data.updatedDocument);
+      }
+    } catch {
+      const errorMsg: ChatMessage = {
+        id: Date.now().toString(),
+        role: 'ai',
+        content: 'Sorry, I encountered an error while processing your request.'
+      };
+      setChatMessages((prev) => [...prev, errorMsg]);
+    } finally {
+      setIsChatLoading(false);
+    }
+  };
 
   const handleCopy = async () => {
     const plainText = content
@@ -280,9 +377,14 @@ export function FullPagePRDViewer({
   };
 
   const handleDownloadWord = async () => {
-    const sanitizedName = productName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
-    const fileName = `${sanitizedName}_prd_${new Date().toISOString().split('T')[0]}`;
-    await exportToWord(content, fileName);
+    try {
+      const sanitizedName = productName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+      const fileName = `${sanitizedName}_prd_${new Date().toISOString().split('T')[0]}`;
+      await exportToWord(content, fileName);
+    } catch (error) {
+      console.error('Failed to download Word document:', error);
+      alert('Failed to generate Word document. Please try again.');
+    }
   };
 
   const scrollToHeading = (id: string) => {
@@ -396,6 +498,46 @@ export function FullPagePRDViewer({
           </div>
 
           <div className="flex items-center gap-2">
+            {isEditing ? (
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm" onClick={handleCancelEdit}>
+                  Cancel
+                </Button>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={handleSaveEdit}
+                  className="bg-green-600 hover:bg-green-700"
+                >
+                  <Save className="mr-2 h-4 w-4" /> Save
+                </Button>
+              </div>
+            ) : (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsEditing(true)}
+              >
+                <Pencil className="mr-2 h-4 w-4" /> Edit
+              </Button>
+            )}
+
+            <Button
+              variant={isChatOpen ? 'secondary' : 'outline'}
+              size="sm"
+              onClick={() => setIsChatOpen(!isChatOpen)}
+              className={
+                isChatOpen ? 'border-blue-200 bg-blue-50 text-blue-700' : ''
+              }
+            >
+              <MessageSquare className="mr-2 h-4 w-4" />
+              <span className="hidden sm:inline">
+                {isChatOpen ? 'Close Chat' : 'AI Assistant'}
+              </span>
+            </Button>
+
+            <div className="mx-2 hidden h-6 w-px bg-gray-200 sm:block" />
+
             <Button
               variant="outline"
               size="sm"
@@ -512,56 +654,164 @@ export function FullPagePRDViewer({
           </div>
 
           {/* Main Content Area */}
-          <div className="flex-1 overflow-auto bg-white print:overflow-visible">
-            <div className="mx-auto max-w-4xl p-8 pb-32 sm:p-12 print:p-0 print:pb-0">
-              {isComparisonMode && prdInput?.currentState && (
-                <div className="mb-12 rounded-xl border border-gray-200 bg-gray-50/50 p-6 print:mb-8 print:border-0 print:bg-transparent print:p-0">
-                  <div className="mb-6 flex items-center gap-2 text-lg font-semibold text-gray-900 print:mb-4">
-                    <ArrowRight className="h-5 w-5 text-gray-400 print:hidden" />
-                    Comparison View
-                  </div>
-                  <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 print:grid-cols-2 print:gap-4">
-                    <div className="space-y-3">
-                      <div className="inline-flex items-center rounded-md bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-700 ring-1 ring-red-600/10 ring-inset">
-                        Before (Current State)
+          <div className="relative flex-1 overflow-auto bg-white print:overflow-visible">
+            {isEditing ? (
+              <div className="absolute inset-0 bg-gray-50 p-6">
+                <textarea
+                  value={editedContent}
+                  onChange={(e) => setEditedContent(e.target.value)}
+                  className="h-full w-full resize-none rounded-xl border-0 bg-white p-6 font-mono text-sm leading-relaxed text-gray-800 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none focus:ring-inset"
+                  spellCheck={false}
+                />
+              </div>
+            ) : (
+              <div className="mx-auto max-w-4xl p-8 pb-32 sm:p-12 print:p-0 print:pb-0">
+                {isComparisonMode && prdInput?.currentState && (
+                  <div className="mb-12 rounded-xl border border-gray-200 bg-gray-50/50 p-6 print:mb-8 print:border-0 print:bg-transparent print:p-0">
+                    <div className="mb-6 flex items-center gap-2 text-lg font-semibold text-gray-900 print:mb-4">
+                      <ArrowRight className="h-5 w-5 text-gray-400 print:hidden" />
+                      Comparison View
+                    </div>
+                    <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 print:grid-cols-2 print:gap-4">
+                      <div className="space-y-3">
+                        <div className="inline-flex items-center rounded-md bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-700 ring-1 ring-red-600/10 ring-inset">
+                          Before (Current State)
+                        </div>
+                        <div className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm print:border-gray-300 print:shadow-none">
+                          <p className="text-sm leading-relaxed whitespace-pre-wrap text-gray-700">
+                            {prdInput.currentState}
+                          </p>
+                        </div>
                       </div>
-                      <div className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm print:border-gray-300 print:shadow-none">
-                        <p className="text-sm leading-relaxed whitespace-pre-wrap text-gray-700">
-                          {prdInput.currentState}
-                        </p>
+                      <div className="space-y-3">
+                        <div className="inline-flex items-center rounded-md bg-green-50 px-2.5 py-1 text-xs font-semibold text-green-700 ring-1 ring-green-600/20 ring-inset">
+                          After (Proposed Changes)
+                        </div>
+                        <div className="rounded-lg border border-green-200 bg-white p-5 shadow-sm ring-1 ring-green-50 print:border-gray-300 print:shadow-none print:ring-0">
+                          <p className="text-sm leading-relaxed whitespace-pre-wrap text-gray-700">
+                            {prdInput.proposedChanges}
+                          </p>
+                        </div>
                       </div>
                     </div>
-                    <div className="space-y-3">
-                      <div className="inline-flex items-center rounded-md bg-green-50 px-2.5 py-1 text-xs font-semibold text-green-700 ring-1 ring-green-600/20 ring-inset">
-                        After (Proposed Changes)
-                      </div>
-                      <div className="rounded-lg border border-green-200 bg-white p-5 shadow-sm ring-1 ring-green-50 print:border-gray-300 print:shadow-none print:ring-0">
-                        <p className="text-sm leading-relaxed whitespace-pre-wrap text-gray-700">
-                          {prdInput.proposedChanges}
-                        </p>
-                      </div>
-                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              {content && content.trim().length > 0 ? (
-                <div className="markdown-content text-gray-800">
-                  <MarkdownRenderer content={content} />
-                </div>
-              ) : (
-                <div className="flex flex-col items-center justify-center py-24 text-center">
-                  <FileText className="mb-4 h-12 w-12 text-gray-300" />
-                  <p className="text-lg font-medium text-gray-900">
-                    No PRD content to display
-                  </p>
-                  <p className="mt-1 text-sm text-gray-500">
-                    Please generate a PRD first to see it here.
-                  </p>
-                </div>
-              )}
-            </div>
+                {content && content.trim().length > 0 ? (
+                  <div className="markdown-content text-gray-800">
+                    <MarkdownRenderer content={content} />
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-24 text-center">
+                    <FileText className="mb-4 h-12 w-12 text-gray-300" />
+                    <p className="text-lg font-medium text-gray-900">
+                      No PRD content to display
+                    </p>
+                    <p className="mt-1 text-sm text-gray-500">
+                      Please generate a PRD first to see it here.
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
+
+          {/* Right Sidebar: AI Chat Assistant */}
+          {isChatOpen && (
+            <div className="z-10 flex w-80 flex-shrink-0 flex-col border-l border-gray-200 bg-white shadow-[-4px_0_15px_-3px_rgba(0,0,0,0.05)] print:hidden">
+              <div className="flex items-center justify-between border-b border-gray-100 bg-gray-50/80 px-4 py-3">
+                <div className="flex items-center gap-2">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-md bg-blue-100">
+                    <Sparkles className="h-4 w-4 text-blue-700" />
+                  </div>
+                  <h3 className="text-sm font-semibold text-gray-900">
+                    AI Assistant
+                  </h3>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7 rounded-full"
+                  onClick={() => setIsChatOpen(false)}
+                >
+                  <X className="h-4 w-4 text-gray-500" />
+                </Button>
+              </div>
+
+              {/* Messages Area */}
+              <div
+                ref={chatScrollRef}
+                className="flex-1 space-y-4 overflow-y-auto bg-gray-50/30 p-4"
+              >
+                {chatMessages.length === 0 ? (
+                  <div className="py-8 text-center text-sm text-gray-500">
+                    <MessageSquare className="mx-auto mb-3 h-8 w-8 text-gray-300" />
+                    <p>
+                      Ask me to rewrite sections, check for missing
+                      requirements, or add new features to your PRD.
+                    </p>
+                  </div>
+                ) : (
+                  chatMessages.map((msg) => (
+                    <div
+                      key={msg.id}
+                      className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}
+                    >
+                      <div
+                        className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-[13px] leading-relaxed shadow-sm ${
+                          msg.role === 'user'
+                            ? 'rounded-br-sm bg-blue-600 text-white'
+                            : 'rounded-bl-sm border border-gray-200 bg-white text-gray-800'
+                        }`}
+                      >
+                        {msg.content}
+                      </div>
+                    </div>
+                  ))
+                )}
+                {isChatLoading && (
+                  <div className="flex items-start">
+                    <div className="rounded-2xl rounded-bl-sm border border-gray-200 bg-white px-4 py-3 shadow-sm">
+                      <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Chat Input */}
+              <div className="border-t border-gray-200 bg-white p-4">
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    handleSendChatMessage();
+                  }}
+                  className="flex items-end gap-2"
+                >
+                  <textarea
+                    value={chatInput}
+                    onChange={(e) => setChatInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        handleSendChatMessage();
+                      }
+                    }}
+                    placeholder="Ask AI to update..."
+                    className="flex max-h-32 min-h-[44px] w-full resize-none rounded-xl border border-gray-300 bg-white px-3 py-2.5 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
+                    rows={1}
+                  />
+                  <Button
+                    type="submit"
+                    size="icon"
+                    className="h-11 w-11 shrink-0 rounded-xl bg-blue-600 text-white hover:bg-blue-700"
+                    disabled={!chatInput.trim() || isChatLoading}
+                  >
+                    <Send className="h-4 w-4" />
+                  </Button>
+                </form>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

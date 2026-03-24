@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { Type, GoogleGenAI } from '@google/genai';
 import { PrdInput, SECTION_FIELD_MAPPING } from '../../../lib/prd';
 import { getContextHeader } from '../_lib/datetime';
+import { cleanJsonResponse } from '@/lib/utils';
 
 function isPrdInput(value: unknown): value is PrdInput {
   if (!value || typeof value !== 'object') {
@@ -119,7 +120,7 @@ Your task is to update the values for the fields in the "${sectionTitle}" sectio
       );
     }
 
-    const parsed = JSON.parse(jsonString);
+    const parsed = JSON.parse(cleanJsonResponse(jsonString));
     const validatedResult: Partial<PrdInput> = {};
     fieldsToRefine.forEach((field) => {
       if (

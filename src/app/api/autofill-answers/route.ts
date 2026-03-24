@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Type, GoogleGenAI } from '@google/genai';
 import { getContextHeader } from '../_lib/datetime';
+import { cleanJsonResponse } from '@/lib/utils';
 
 export async function POST(request: NextRequest) {
   try {
@@ -73,7 +74,7 @@ Return the response strictly as a JSON object containing an 'answers' array of s
       );
     }
 
-    const parsed = JSON.parse(jsonString);
+    const parsed = JSON.parse(cleanJsonResponse(jsonString));
     return NextResponse.json({ data: parsed.answers || [] });
   } catch (error) {
     const message =

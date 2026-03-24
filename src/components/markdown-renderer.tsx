@@ -11,7 +11,7 @@ function getIDFromChildren(children: React.ReactNode): string {
   React.Children.forEach(children, (child) => {
     if (typeof child === 'string') {
       text += child;
-    } else if (React.isValidElement(child) && child.props.children) {
+    } else if (React.isValidElement<{ children?: React.ReactNode }>(child) && child.props.children) {
       text += getIDFromChildren(child.props.children);
     }
   });
